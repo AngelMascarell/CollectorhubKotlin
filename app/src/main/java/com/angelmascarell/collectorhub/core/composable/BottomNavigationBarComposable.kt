@@ -16,8 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.angelmascarell.collectorhub.ui.theme.MySoftBlue
 import com.angelmascarell.collectorhub.ui.theme.MyUltraBlue
-import com.angelmascarell.collectorhubApp.core.routes.LocalNavController
-import com.angelmascarell.collectorhubApp.core.routes.NavigationItem
+import com.angelmascarell.collectorhub.core.routes.LocalNavController
+import com.angelmascarell.collectorhub.core.routes.NavigationItem
 
 @Composable
 fun BottomNavigationBar(route: String) {

@@ -1,4 +1,4 @@
-package com.angelmascarell.collectorhubApp.core.routes
+package com.angelmascarell.collectorhub.core.routes
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle

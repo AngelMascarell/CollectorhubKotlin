@@ -5,20 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.angelmascarell.collectorhub.ui.theme.CollectorHubTheme
 import com.angelmascarell.collectorhub.ui.theme.MyNormalBlue
 import com.angelmascarell.collectorhub.ui.theme.MySoftBlue
-import com.angelmascarell.collectorhubApp.core.routes.AppNavigation
+import com.angelmascarell.collectorhub.core.routes.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

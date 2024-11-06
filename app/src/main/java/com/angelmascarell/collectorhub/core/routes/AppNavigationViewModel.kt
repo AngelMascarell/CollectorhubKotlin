@@ -1,14 +1,14 @@
-package com.angelmascarell.collectorhubApp.core.routes
+package com.angelmascarell.collectorhub.core.routes
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.angelmascarell.collectorhubApp.signin.data.network.response.LoginService
+import com.angelmascarell.collectorhub.signin.data.network.request.LoginRequest
+import com.angelmascarell.collectorhub.signin.data.network.response.LoginService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import okhttp3.FormBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -16,21 +16,19 @@ class AppNavigationViewModel @Inject constructor(
     private val api: LoginService
 ) : ViewModel() {
 
-    private val _firstScreen = MutableLiveData<String>(Routes.SignInScreenRoute.route) // Valor predeterminado
+    private val _firstScreen =
+        MutableLiveData<String>(Routes.SignInScreenRoute.route) // Valor predeterminado
     val firstScreen: LiveData<String> = _firstScreen
 
     fun getFirstScreen(username: String, password: String) {
         Log.e("before-login", _firstScreen.value.toString())
         viewModelScope.launch {
             try {
-                // Construir el FormBody con las credenciales
-                val requestBody = FormBody.Builder()
-                    .add("username", username)
-                    .add("password", password)
-                    .build()
+                // Crear el objeto LoginRequest con las credenciales
+                val loginRequest = LoginRequest(username, password)
 
-                // Intenta obtener la pantalla inicial desde la API
-                val result = api.doSignIn(requestBody)
+                // Realizar la llamada al servicio de inicio de sesión
+                val result = api.doSignIn(loginRequest.username, loginRequest.password)
                 _firstScreen.value = result
                 Log.e("api-login", "Login success: $result")
             } catch (e: Exception) {
@@ -42,4 +40,3 @@ class AppNavigationViewModel @Inject constructor(
         }
     }
 }
-

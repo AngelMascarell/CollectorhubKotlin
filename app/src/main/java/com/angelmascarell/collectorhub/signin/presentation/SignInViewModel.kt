@@ -1,6 +1,5 @@
-package com.angelmascarell.collectorhubApp.signin.presentation
+package com.angelmascarell.collectorhub.signin.presentation
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -9,11 +8,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.angelmascarell.collectorhubApp.core.routes.Routes
-import com.angelmascarell.collectorhubApp.signin.data.network.response.LoginService
+import com.angelmascarell.collectorhub.signin.data.network.request.LoginRequest
+import com.angelmascarell.collectorhub.core.routes.Routes
+import com.angelmascarell.collectorhub.signin.data.network.response.LoginService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import okhttp3.FormBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,28 +38,36 @@ class SignInViewModel @Inject constructor(
         val usernameValue = username.value.orEmpty()
         val passwordValue = password.value.orEmpty()
 
+        // Verifica si el nombre de usuario y la contraseña no están vacíos
         if (usernameValue.isBlank() || passwordValue.isBlank()) {
             callback.invoke(_isLogin.value!!)
             return
         }
 
-        val requestBody = FormBody.Builder()
-            .add("username", usernameValue)
-            .add("password", passwordValue)
-            .build()
+        // Crear el LoginRequest con los valores de usuario y contraseña
+        val loginRequest = LoginRequest(usernameValue, passwordValue)
 
         viewModelScope.launch {
-            val result = loginService.doSignIn(requestBody)
+            try {
+                // Usar el loginRequest en lugar del FormBody
+                val result = loginService.doSignIn(loginRequest.username, loginRequest.password)
 
-            // Verifica si la ruta devuelta es para la pantalla de inicio
-            if (result == Routes.HomeScreenRoute.route) {
-                _isLogin.value = true // Inicio de sesión exitoso
-            } else {
-                _isLogin.value = false // Inicio de sesión fallido
+                // Verifica si la ruta devuelta es para la pantalla de inicio
+                if (result == Routes.HomeScreenRoute.route) {
+                    _isLogin.value = true // Inicio de sesión exitoso
+                } else {
+                    _isLogin.value = false // Inicio de sesión fallido
+                }
+
+                // Actualiza la ruta de redirección
+                _redirectRoute.value = result
+                callback.invoke(_isLogin.value!!)
+            } catch (e: Exception) {
+                // Maneja excepciones si las hubiera
+                _isLogin.value = false
+                _redirectRoute.value = Routes.SignInScreenRoute.route // Ruta de inicio de sesión en caso de error
+                callback.invoke(_isLogin.value!!)
             }
-
-            _redirectRoute.value = result // Actualiza la ruta de redirección
-            callback.invoke(_isLogin.value!!)
         }
     }
 

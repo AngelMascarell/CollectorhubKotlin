@@ -1,4 +1,4 @@
-package com.angelmascarell.collectorhubApp.signin.presentation
+package com.angelmascarell.collectorhub.signin.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -40,8 +40,8 @@ import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.composable.MyButton
 import com.angelmascarell.collectorhub.ui.theme.CollectorHubTheme
 import com.angelmascarell.collectorhub.ui.theme.MyUltraBlue
-import com.angelmascarell.collectorhubApp.core.routes.LocalNavController
-import com.angelmascarell.collectorhubApp.core.routes.Routes
+import com.angelmascarell.collectorhub.core.routes.LocalNavController
+import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.core.composable.MyBasicTextField
 
 
