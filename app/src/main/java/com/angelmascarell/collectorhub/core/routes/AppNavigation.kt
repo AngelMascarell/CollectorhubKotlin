@@ -15,7 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.angelmascarell.collectorhub.signin.presentation.SignInScreen
-import com.angelmascarell.collectorhub.signin.presentation.SuccessScreen
+import com.angelmascarell.collectorhub.home.presentation.HomeScreen
 
 // Global variable
 val LocalNavController = compositionLocalOf<NavHostController> { error("No NavController found!") }
@@ -40,7 +40,7 @@ fun AppNavigation(appNavigationViewModel: AppNavigationViewModel = hiltViewModel
         firstScreen?.let {
             NavHost(navController = navController, startDestination = Routes.SignInScreenRoute.route) {
                 composable(route = Routes.HomeScreenRoute.route) {
-                    SuccessScreen()
+                    HomeScreen()
                 }
                 composable(route = Routes.SignInScreenRoute.route) {
                     SignInScreen()

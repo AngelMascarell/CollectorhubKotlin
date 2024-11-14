@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class LoginService @Inject constructor(
+class HomeService @Inject constructor(
     private val api: HomeClient,
     private val dataStore: DataStore<Preferences>
 ) {
@@ -51,5 +51,4 @@ class LoginService @Inject constructor(
         val savedToken = dataStore.data.first()[stringPreferencesKey("accessToken")]
         Log.d("TokenManager", "Token guardado: $savedToken")
     }
-
 }

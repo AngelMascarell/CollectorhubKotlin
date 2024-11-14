@@ -2,8 +2,11 @@ package com.angelmascarell.collectorhub.core.routes
 
 sealed class Routes(val route: String) {
     object SignInScreenRoute : Routes("signInScreen")
+    object HomeScreenRoute : Routes("HomeScreen")
+
+
+
     object SignUpScreenRoute : Routes("signUpScreen")
-    object HomeScreenRoute : Routes("SuccessScreen")
     object RoomDetailsScreenRoute : Routes("roomDetailsScreen/{number}") {
         fun createRoute(number: String) = "roomDetailsScreen/$number"
     }

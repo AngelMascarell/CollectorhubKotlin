@@ -1,8 +1,14 @@
 package com.angelmascarell.collectorhub.core.dependencyinjection
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.angelmascarell.collectorhub.signin.data.network.response.LoginClient
+import com.angelmascarell.collectorhub.core.network.AuthInterceptor
+import com.angelmascarell.collectorhub.data.local.TokenManager
+import com.angelmascarell.collectorhub.data.network.MangaApiService
+import com.angelmascarell.collectorhub.data.repository.MangaRepository
+import com.angelmascarell.collectorhub.signin.data.network.response.HomeClient
+import com.angelmascarell.collectorhub.home.presentation.HomeViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,17 +37,25 @@ object NetworkModule {
     fun provideRetrofitWithHeader(@ApplicationContext context: Context): Retrofit {
         val httpClient = OkHttpClient.Builder()
             .addInterceptor { chain: Interceptor.Chain ->
-                val original: Request = chain.request()
-                val accessToken: String = runBlocking {
-                    context.dataStore.data
-                        .map { preferences ->
-                            preferences[stringPreferencesKey("accessToken")] ?: ""
-                        }
-                        .first()
+                // Ejecutar el código asincrónicamente utilizando un CoroutineScope
+                val accessToken = kotlinx.coroutines.runBlocking {
+                    TokenManager(context).getToken() // Recuperar el token desde el DataStore
                 }
+
+                Log.d("Interceptor", "Token: $accessToken") // Verifica que el token no esté vacío
+
+                // Si el token está vacío, puedes agregar una lógica para manejar el caso de error
+                if (accessToken.isEmpty()) {
+                    Log.e("Interceptor", "Token vacío!")
+                }
+
+                // Construir la solicitud con el token
+                val original: Request = chain.request()
                 val requestBuilder: Request.Builder = original.newBuilder()
-                    .header("auth-token", accessToken)
+                    .header("Authorization", "Bearer $accessToken")
                 val request: Request = requestBuilder.build()
+
+                // Continuar con la solicitud
                 chain.proceed(request)
             }
             .build()
@@ -52,6 +66,8 @@ object NetworkModule {
             .client(httpClient)
             .build()
     }
+
+
 
     @Singleton
     @Provides
@@ -66,10 +82,52 @@ object NetworkModule {
             .build()
     }
 
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8080/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideApplicationContext(@ApplicationContext context: Context): Context {
+        return context
+    }
 
     @Singleton
     @Provides
-    fun provideLoginClient(@Named(WITHOUT_HEADER) retrofit: Retrofit): LoginClient {
-        return retrofit.create(LoginClient::class.java)
+    fun provideLoginClient(@Named(WITHOUT_HEADER) retrofit: Retrofit): HomeClient {
+        return retrofit.create(HomeClient::class.java)
     }
+
+    @Provides
+    fun provideMangaRepository(apiService: MangaApiService): MangaRepository {
+        return MangaRepository(apiService)
+    }
+
+    @Singleton
+    @Provides
+    fun provideMangaApiService(@Named(WITH_HEADER) retrofit: Retrofit): MangaApiService {
+        return retrofit.create(MangaApiService::class.java)
+    }
+
+
+/*    @Provides
+    fun provideHomeViewModel(repository: MangaRepository): HomeViewModel {
+        return HomeViewModel(repository)
+    }
+
+ */
 }

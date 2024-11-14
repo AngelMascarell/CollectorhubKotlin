@@ -8,16 +8,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.angelmascarell.collectorhub.signin.data.network.request.LoginRequest
+import com.angelmascarell.collectorhub.signin.data.network.request.HomeRequest
 import com.angelmascarell.collectorhub.core.routes.Routes
-import com.angelmascarell.collectorhub.signin.data.network.response.LoginService
+import com.angelmascarell.collectorhub.signin.data.network.response.HomeService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    var loginService: LoginService,
+    var loginService: HomeService,
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 
@@ -45,7 +45,7 @@ class SignInViewModel @Inject constructor(
         }
 
         // Crear el LoginRequest con los valores de usuario y contraseña
-        val loginRequest = LoginRequest(usernameValue, passwordValue)
+        val loginRequest = HomeRequest(usernameValue, passwordValue)
 
         viewModelScope.launch {
             try {

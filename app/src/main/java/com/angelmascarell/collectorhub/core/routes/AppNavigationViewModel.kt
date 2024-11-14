@@ -5,15 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.angelmascarell.collectorhub.signin.data.network.request.LoginRequest
-import com.angelmascarell.collectorhub.signin.data.network.response.LoginService
+import com.angelmascarell.collectorhub.signin.data.network.request.HomeRequest
+import com.angelmascarell.collectorhub.signin.data.network.response.HomeService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AppNavigationViewModel @Inject constructor(
-    private val api: LoginService
+    private val api: HomeService
 ) : ViewModel() {
 
     private val _firstScreen =
@@ -25,7 +25,7 @@ class AppNavigationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Crear el objeto LoginRequest con las credenciales
-                val loginRequest = LoginRequest(username, password)
+                val loginRequest = HomeRequest(username, password)
 
                 // Realizar la llamada al servicio de inicio de sesión
                 val result = api.doSignIn(loginRequest.username, loginRequest.password)

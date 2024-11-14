@@ -54,6 +54,11 @@ android {
 }
 
 dependencies {
+
+    implementation("com.google.accompanist:accompanist-pager:0.28.0") // versión más reciente
+    implementation("io.coil-kt:coil-compose:2.2.0")
+
+
     // ConstraintLayout -> Structure our composables
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
