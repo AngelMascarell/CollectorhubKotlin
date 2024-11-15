@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.angelmascarell.collectorhub.signin.data.network.request.HomeRequest
-import com.angelmascarell.collectorhub.signin.data.network.response.HomeService
+import com.angelmascarell.collectorhub.home.data.network.response.HomeService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -50,16 +52,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.angelmascarell.collectorhub.R
+import com.angelmascarell.collectorhub.core.routes.LocalNavController
+import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.data.model.MangaModel
 import com.angelmascarell.collectorhub.viewmodel.ThemeViewModel
+
 
 @Preview(showBackground = true)
 @Composable
@@ -70,6 +75,8 @@ fun PreviewHomeScreen() {
 
 @Composable
 fun HomeScreen() {
+    val navController = LocalNavController.current
+
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
 
@@ -80,35 +87,50 @@ fun HomeScreen() {
 
         var searchQuery by remember { mutableStateOf("") }
         val mangas = homeViewModel.mangas.value
+        val personalizedMangas = homeViewModel.personalizedMangas.value
         val isLoading = homeViewModel.isLoading.value
         val errorMessage = homeViewModel.errorMessage.value
 
+        // Llamada para cargar mangas personalizados
         LaunchedEffect(true) {
+            homeViewModel.loadPersonalizedMangas()
             homeViewModel.loadMangas()
         }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .background(if (isDarkTheme) Color(0xFF121212) else Color.White)
                 .padding(16.dp)
+                .padding(bottom = 80.dp)
         ) {
-            Button(
-                onClick = { themeViewModel.toggleTheme() },
+            Row(
                 modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .size(48.dp)
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.mastercard), // Asegúrate de tener un ícono visible
-                    contentDescription = "Cambiar tema",
-                    modifier = Modifier.fillMaxSize()
-                )
+                Button(
+                    onClick = { themeViewModel.toggleTheme() },
+                    modifier = Modifier.size(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isDarkTheme) Color(0xFF444444) else Color(0xFFFFA500)
+                    )
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_star),
+                        contentDescription = "Cambiar tema",
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                HeaderRow()
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            HeaderRow()
             Spacer(modifier = Modifier.height(10.dp))
             FirstRowButtons()
             Spacer(modifier = Modifier.height(10.dp))
@@ -130,9 +152,33 @@ fun HomeScreen() {
                 Text(text = it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
             }
 
+            Text(text = "Mangas personalizados", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (!isLoading && personalizedMangas.isNotEmpty()) {
+                MangaSlider(mangas = personalizedMangas)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            PremiumAdBanner(onClick = {
+                navController.navigate(Routes.PremiumScreenRoute.route)
+            })
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text(text = "Mangas generales", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             if (!isLoading && mangas.isNotEmpty()) {
                 MangaSlider(mangas = mangas)
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AdBanner()
         }
     }
 }
@@ -301,6 +347,103 @@ fun MangaImage(manga: MangaModel) {
         )
     }
 }
+
+@Composable
+fun PremiumAdBanner(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth() // Ocupa todo el ancho de la pantalla
+            .aspectRatio(3f) // Relación de aspecto ancho:alto
+            .clip(RoundedCornerShape(10.dp)) // Sin bordes redondeados (opcional, puedes cambiarlos)
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    listOf(
+                        Color(0xFFFDBB2D), // Amarillo oro
+                        Color(0xFFE85D04), // Naranja intenso
+                    )
+                )
+            )
+    ) {
+        // Contenido del banner
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier.weight(3f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Hazte Premium",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "¡Disfruta contenido exclusivo y sin anuncios!",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+            }
+            Button(
+                onClick = onClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6A0572) // Botón violeta intenso
+                ),
+                modifier = Modifier
+                    .weight(1.2f) // Ajusta el ancho relativo
+                    .height(48.dp), // Altura fija más pequeña
+                shape = RoundedCornerShape(10.dp), // Esquinas completamente rectas
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp) // Reduce el padding interno
+            ) {
+                Text(
+                    "Suscribirse",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium // Asegúrate de usar un estilo adecuado
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AdBanner() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth() // Asegura que ocupe todo el ancho
+            .padding(8.dp)
+            .background(Color(0xFFFFA500), RoundedCornerShape(8.dp)) // Color de fondo y bordes redondeados
+            .height(60.dp) // Altura del banner
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // Texto o contenido del anuncio
+            Text(
+                text = "¡Anuncio Premium!",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            // Aquí va la imagen del anuncio
+            Image(
+                painter = painterResource(id = R.drawable.libros), // Reemplaza con el ícono de tu anuncio
+                contentDescription = "Publicidad",
+                modifier = Modifier.size(32.dp)
+            )
+        }
+    }
+}
+
+
 
 @Composable
 fun customDarkColorScheme(): ColorScheme {

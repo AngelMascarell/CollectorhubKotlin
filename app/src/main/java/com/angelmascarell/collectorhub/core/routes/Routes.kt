@@ -3,6 +3,7 @@ package com.angelmascarell.collectorhub.core.routes
 sealed class Routes(val route: String) {
     object SignInScreenRoute : Routes("signInScreen")
     object HomeScreenRoute : Routes("HomeScreen")
+    object PremiumScreenRoute : Routes("PremiumScreen")
 
 
 

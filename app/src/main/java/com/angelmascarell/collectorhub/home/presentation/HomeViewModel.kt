@@ -1,7 +1,10 @@
 package com.angelmascarell.collectorhub.home.presentation
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.angelmascarell.collectorhub.data.local.TokenManager
@@ -30,6 +33,28 @@ class HomeViewModel @Inject constructor(
     private val _errorMessage = mutableStateOf<String?>(null)
     val errorMessage: State<String?> = _errorMessage
 
+    private val _personalizedMangas = mutableStateOf<List<MangaModel>>(emptyList())
+    val personalizedMangas: State<List<MangaModel>> = _personalizedMangas
+
+    fun loadPersonalizedMangas() {
+        _isLoading.value = true
+        _errorMessage.value = null
+
+        viewModelScope.launch {
+            try {
+                // Obtener mangas personalizados desde el repositorio
+                val mangas = mangaRepository.getPersonalizedMangas()
+                _personalizedMangas.value = mangas
+            } catch (e: Exception) {
+                // Manejar error
+                Log.e("MangaViewModel", "Error loading personalized mangas", e)
+                _errorMessage.value = "Error al cargar los mangas personalizados"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     // Función para cargar los mangas
     fun loadMangas() {
         _isLoading.value = true
@@ -57,4 +82,5 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
+
 

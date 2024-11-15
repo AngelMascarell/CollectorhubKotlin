@@ -2,21 +2,18 @@ package com.angelmascarell.collectorhub.core.dependencyinjection
 
 import android.content.Context
 import android.util.Log
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import com.angelmascarell.collectorhub.core.network.AuthInterceptor
 import com.angelmascarell.collectorhub.data.local.TokenManager
 import com.angelmascarell.collectorhub.data.network.MangaApiService
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
-import com.angelmascarell.collectorhub.signin.data.network.response.HomeClient
-import com.angelmascarell.collectorhub.home.presentation.HomeViewModel
+import com.angelmascarell.collectorhub.home.data.network.response.HomeClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -113,9 +110,13 @@ object NetworkModule {
     }
 
     @Provides
-    fun provideMangaRepository(apiService: MangaApiService): MangaRepository {
-        return MangaRepository(apiService)
+    fun provideMangaRepository(
+        apiService: MangaApiService,
+        dataStore: DataStore<Preferences>  // Agregar DataStore como parámetro
+    ): MangaRepository {
+        return MangaRepository(apiService, dataStore)  // Pasar DataStore al constructor
     }
+
 
     @Singleton
     @Provides

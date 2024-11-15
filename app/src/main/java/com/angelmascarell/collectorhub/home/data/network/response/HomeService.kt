@@ -1,12 +1,14 @@
-package com.angelmascarell.collectorhub.signin.data.network.response
+package com.angelmascarell.collectorhub.home.data.network.response
 
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.angelmascarell.collectorhub.signin.data.network.request.HomeRequest
 import com.angelmascarell.collectorhub.core.routes.Routes
+import com.angelmascarell.collectorhub.home.data.network.response.HomeClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
@@ -28,7 +30,7 @@ class HomeService @Inject constructor(
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null) {
-                        saveTokensToDataStore(loginResponse.accessToken)
+                        saveTokensToDataStore(loginResponse.accessToken, loginResponse.userId)  // Guardamos también el userId
                         return@withContext Routes.HomeScreenRoute.route // Ruta deseada para usuarios autenticados
                     } else {
                         Log.e("doSignIn", "LoginModel is null")
@@ -43,12 +45,14 @@ class HomeService @Inject constructor(
         }
     }
 
-    private suspend fun saveTokensToDataStore(accessToken: String) {
+    private suspend fun saveTokensToDataStore(accessToken: String, userId: Long) {
         dataStore.edit { preferences ->
             preferences[stringPreferencesKey("accessToken")] = accessToken
+            preferences[longPreferencesKey("userId")] = userId  // Guardamos el userId
         }
-        // Verificar si el token fue guardado correctamente
+        // Verificar si el token y el userId fueron guardados correctamente
         val savedToken = dataStore.data.first()[stringPreferencesKey("accessToken")]
-        Log.d("TokenManager", "Token guardado: $savedToken")
+        val savedUserId = dataStore.data.first()[longPreferencesKey("userId")]
+        Log.d("TokenManager", "Token guardado: $savedToken, userId guardado: $savedUserId")
     }
 }
