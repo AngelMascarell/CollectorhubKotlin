@@ -2,26 +2,22 @@ package com.angelmascarell.collectorhub.ui.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,20 +27,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.angelmascarell.collectorhub.R
+import com.angelmascarell.collectorhub.core.routes.LocalNavController
+import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.home.presentation.customDarkColorScheme
 import com.angelmascarell.collectorhub.home.presentation.customLightColorScheme
 import com.angelmascarell.collectorhub.viewmodel.ThemeViewModel
@@ -58,6 +57,8 @@ fun PreviewHomeScreen() {
 
 @Composable
 fun PremiumScreen() {
+    val navController = LocalNavController.current
+
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
 
@@ -67,41 +68,44 @@ fun PremiumScreen() {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.background),
-                contentDescription = "Fondo de pantalla",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.6f)
-                    .graphicsLayer(
-                        scaleX = -1f,
-                    )
-                    .offset(y = (-60).dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Imagen en la parte inferior
+                /*Image(
+                    painter = painterResource(id = R.drawable.fondolibros),
+                    contentDescription = "Fondo de pantalla",
+                    modifier = Modifier
+                        .fillMaxWidth() // O puedes usar .size(200.dp) si prefieres tamaño fijo
+                        .height(200.dp) // Ajusta la altura según lo que necesites
+                        .alpha(0.6f)
+                        .align(Alignment.BottomCenter) // Posiciona la imagen en la parte inferior
+                )
+                 */
+            }
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                CloseButton()
-
-                Title()
+                CloseButton(navController)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Ventajas de ser Premium",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                //Title()
+
+                //Spacer(modifier = Modifier.height(16.dp))
+
+                PremiumText()
+
+                Spacer(modifier = Modifier.height(20.dp))
+
                 AdvantagesList()
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                //TODO: AJUSTAR EL TAMAÑO DE LOS OBJETOS PARA QUE ENTRE TODO
-                //PricingSection()
+                PricingSection()
 
                 AdBanner()
             }
@@ -116,9 +120,28 @@ fun Title() {
         fontSize = 28.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(vertical = 16.dp),
-        style = MaterialTheme.typography.titleLarge
+        style = MaterialTheme.typography.titleLarge,
     )
 }
+
+@Composable
+fun PremiumText() {
+    Text(
+        text = "Ventajas de ser Premium",
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        style = TextStyle(
+            brush = Brush.horizontalGradient(
+                colors = listOf(
+                    Color(0xFFFDBB2D),
+                    Color(0xFFE85D04)
+                )
+            )
+        ),
+        modifier = Modifier.graphicsLayer(alpha = 0.99f)
+    )
+}
+
 
 @Composable
 fun AdvantagesList() {
@@ -129,46 +152,52 @@ fun AdvantagesList() {
         Pair("Actualizaciones rápidas", R.drawable.ic_star)
     )
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        advantages.forEach { (description, iconRes) ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-                    .background(
-                        brush = Brush.linearGradient(
-                            listOf(
-                                Color(0xFFD6A6F1), // Morado claro
-                                Color(0xFFF2D4FF)  // Morado muy claro
-                            )
-                        ),
-                        shape = RoundedCornerShape(16.dp) // Esquinas redondeadas para un diseño moderno
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 2.dp,
+                brush = Brush.linearGradient(
+                    listOf(
+                        Color(0xFFD6A6F1),
+                        Color(0xFFF2D4FF)
                     )
-                    .padding(16.dp) // Agregar padding para no dejar el contenido pegado
-                    .shadow(4.dp, shape = RoundedCornerShape(16.dp)) // Sombra para darle profundidad
-                    .clickable { /* Acción de clic, si es necesario */ },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = iconRes),
-                    contentDescription = description,
+                ),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .background(Color(0xFFf8f8f5))
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            advantages.forEach { (description, iconRes) ->
+                Row(
                     modifier = Modifier
-                        .size(32.dp)
-                        .padding(8.dp)
-                        .background(Color.White, shape = CircleShape) // Fondo blanco redondeado para el ícono
-                        .padding(4.dp) // Espacio entre el ícono y el fondo
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Black), // Color del texto
-                    modifier = Modifier.weight(1f)
-                )
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp, horizontal = 5.dp)
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = iconRes),
+                        contentDescription = description,
+                        modifier = Modifier
+                            .size(26.dp)
+                            .padding(2.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = description,
+                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
 }
-
 
 @Composable
 fun PricingSection() {
@@ -178,36 +207,49 @@ fun PricingSection() {
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Precio mensual
         PriceOptionCard(
             price = "$1.19",
             title = "Mensual",
             description = "Pago mensual, cancelable en cualquier momento",
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .height(200.dp)
         )
 
-        // Precio anual
         PriceOptionCard(
             price = "$11.99",
             title = "Anual",
             description = "Pago anual con descuento, acceso continuo",
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .height(200.dp)
         )
     }
 }
 
 @Composable
-fun PriceOptionCard(price: String, title: String, description: String, modifier: Modifier = Modifier) {
+fun PriceOptionCard(
+    price: String,
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier
-            .fillMaxHeight()
             .padding(8.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFD1C4E9)) // Un tono lavanda más oscuro
+                .background(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            Color(0xFFFDBB2D),
+                            Color(0xFFE85D04)
+                        )
+                    )
+                )
         ) {
             Column(
                 modifier = Modifier
@@ -219,7 +261,7 @@ fun PriceOptionCard(price: String, title: String, description: String, modifier:
                     text = title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6A0572),
+                    color = Color.Black,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
@@ -227,15 +269,16 @@ fun PriceOptionCard(price: String, title: String, description: String, modifier:
                     text = price,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6A0572),
+                    color = Color.White,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 Text(
                     text = description,
-                    color = Color.Gray,
+                    color = Color.Black,
                     fontSize = 14.sp,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontStyle = FontStyle.Italic
                 )
             }
         }
@@ -243,11 +286,13 @@ fun PriceOptionCard(price: String, title: String, description: String, modifier:
 }
 
 @Composable
-fun CloseButton() {
+fun CloseButton(navController: NavHostController) {
     IconButton(
-        onClick = { /* Implementar acción de volver */ },
+        onClick = { navController.navigate(Routes.HomeScreenRoute.route) },
         modifier = Modifier
-            .padding(16.dp)
+            .padding(top = 16.dp, end = 16.dp)
+            .size(36.dp)
+            .clip(RoundedCornerShape(50))
             .background(color = Color.LightGray),
     ) {
         Icon(
@@ -258,14 +303,15 @@ fun CloseButton() {
     }
 }
 
+
 @Composable
 fun AdBanner() {
     Box(
         modifier = Modifier
-            .fillMaxWidth() // Asegura que ocupe todo el ancho
+            .fillMaxWidth()
             .padding(8.dp)
-            .background(Color(0xFFFFA500), RoundedCornerShape(8.dp)) // Color de fondo y bordes redondeados
-            .height(60.dp) // Altura del banner
+            .background(Color(0xFFFFA500), RoundedCornerShape(8.dp))
+            .height(60.dp)
     ) {
         Row(
             modifier = Modifier
@@ -274,7 +320,6 @@ fun AdBanner() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            // Texto o contenido del anuncio
             Text(
                 text = "¡COLLECTORHUB PREMIUM!",
                 color = Color.White,
@@ -282,9 +327,8 @@ fun AdBanner() {
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            // Aquí va la imagen del anuncio
             Image(
-                painter = painterResource(id = R.drawable.libros), // Reemplaza con el ícono de tu anuncio
+                painter = painterResource(id = R.drawable.libros),
                 contentDescription = "Publicidad",
                 modifier = Modifier.size(32.dp)
             )

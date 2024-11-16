@@ -15,4 +15,7 @@ interface MangaApiService {
 
     @GET("manga/getCompleted")
     suspend fun getCompletedMangas(): ObtainMangaResponse
+
+    @GET("manga/{id}")
+    suspend fun getOneManga(@Path("id") id : Long) : MangaModel
 }

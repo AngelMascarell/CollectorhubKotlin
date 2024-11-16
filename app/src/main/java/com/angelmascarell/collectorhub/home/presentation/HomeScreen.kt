@@ -3,6 +3,7 @@ package com.angelmascarell.collectorhub.home.presentation
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,20 +59,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.data.model.MangaModel
 import com.angelmascarell.collectorhub.viewmodel.ThemeViewModel
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewHomeScreen() {
-    HomeScreen()
-}
-
 
 @Composable
 fun HomeScreen() {
@@ -152,12 +146,16 @@ fun HomeScreen() {
                 Text(text = it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
             }
 
-            Text(text = "Mangas personalizados", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
+            Text(
+                text = "Mangas personalizados",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 8.dp)
+            )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!isLoading && personalizedMangas.isNotEmpty()) {
-                MangaSlider(mangas = personalizedMangas)
+                MangaSlider(mangas = personalizedMangas, navController = navController, mangaViewModel = homeViewModel)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -168,12 +166,17 @@ fun HomeScreen() {
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            Text(text = "Mangas generales", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
+            Text(
+                text = "Mangas generales",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 8.dp)
+            )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!isLoading && mangas.isNotEmpty()) {
-                MangaSlider(mangas = mangas)
+                MangaSlider(mangas = mangas, navController = navController, mangaViewModel = homeViewModel
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -302,7 +305,11 @@ fun SearchBar(
 }
 
 @Composable
-fun MangaSlider(mangas: List<MangaModel>, modifier: Modifier = Modifier) {
+fun MangaSlider(
+    mangas: List<MangaModel>,
+    modifier: Modifier = Modifier,
+    navController: NavHostController,mangaViewModel: HomeViewModel
+) {
     // Asegúrate de que la lista no esté vacía antes de mostrar el slider
     if (mangas.isNotEmpty()) {
         LazyRow(
@@ -311,7 +318,14 @@ fun MangaSlider(mangas: List<MangaModel>, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(8.dp) // Espaciado entre las imágenes
         ) {
             items(mangas) { manga ->
-                MangaImage(manga = manga)
+                MangaImage(
+                    manga = manga,
+                    onClick = {
+                        Log.d("MangaSlider", "Selected manga ID: ${manga.id}")
+                        mangaViewModel.setMangaId(manga.id)
+                        navController.navigate("GetMangaScreen/${manga.id}")  // Pasamos el mangaId en la ruta
+                    }
+                )
             }
         }
     } else {
@@ -326,18 +340,20 @@ fun MangaSlider(mangas: List<MangaModel>, modifier: Modifier = Modifier) {
     }
 }
 
+
 @Composable
-fun MangaImage(manga: MangaModel) {
+fun MangaImage(manga: MangaModel, onClick: () -> Unit) {
     val imageUrl = "http://10.0.2.2:8080${manga.imageUrl}"
 
     Log.d("Image URL", "URL: $imageUrl")
 
     Box(
         modifier = Modifier
-            .width(170.dp) // Ajusta el tamaño de la imagen
-            .height(220.dp) // Ajusta la altura de la imagen
+            .width(170.dp)
+            .height(220.dp)
             .clip(RoundedCornerShape(16.dp)) // Bordes redondeados
-            .background(MaterialTheme.colorScheme.surface) // Fondo detrás de la imagen, opcional
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable { onClick() } // Detectar el clic y ejecutar la navegación
     ) {
         Image(
             painter = rememberAsyncImagePainter(imageUrl), // Usando Coil o Glide para cargar imágenes
@@ -347,6 +363,7 @@ fun MangaImage(manga: MangaModel) {
         )
     }
 }
+
 
 @Composable
 fun PremiumAdBanner(onClick: () -> Unit) {
@@ -397,7 +414,10 @@ fun PremiumAdBanner(onClick: () -> Unit) {
                     .weight(1.2f) // Ajusta el ancho relativo
                     .height(48.dp), // Altura fija más pequeña
                 shape = RoundedCornerShape(10.dp), // Esquinas completamente rectas
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp) // Reduce el padding interno
+                contentPadding = PaddingValues(
+                    horizontal = 10.dp,
+                    vertical = 8.dp
+                ) // Reduce el padding interno
             ) {
                 Text(
                     "Suscribirse",
@@ -415,7 +435,10 @@ fun AdBanner() {
         modifier = Modifier
             .fillMaxWidth() // Asegura que ocupe todo el ancho
             .padding(8.dp)
-            .background(Color(0xFFFFA500), RoundedCornerShape(8.dp)) // Color de fondo y bordes redondeados
+            .background(
+                Color(0xFFFFA500),
+                RoundedCornerShape(8.dp)
+            ) // Color de fondo y bordes redondeados
             .height(60.dp) // Altura del banner
     ) {
         Row(
@@ -442,7 +465,6 @@ fun AdBanner() {
         }
     }
 }
-
 
 
 @Composable

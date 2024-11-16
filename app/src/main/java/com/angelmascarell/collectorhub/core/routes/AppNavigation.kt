@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.angelmascarell.collectorhub.signin.presentation.SignInScreen
 import com.angelmascarell.collectorhub.home.presentation.HomeScreen
+import com.angelmascarell.collectorhub.ui.view.GetMangaScreen
 import com.angelmascarell.collectorhub.ui.view.PremiumScreen
 
 // Global variable
@@ -49,8 +50,8 @@ fun AppNavigation(appNavigationViewModel: AppNavigationViewModel = hiltViewModel
                 composable(route = Routes.PremiumScreenRoute.route) {
                     PremiumScreen()
                 }
-                composable(route = Routes.ForgotPasswordScreenRoute.route) {
-                    //ForgotPasswordScreen()
+                composable(route = Routes.GetMangaScreenRoute.route) {
+                    GetMangaScreen()
                 }
                 composable(route = Routes.RoomDetailsScreenRoute.route) {
                     //RoomDetailsScreen()

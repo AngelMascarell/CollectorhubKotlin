@@ -30,4 +30,9 @@ class MangaRepository(private val apiService: MangaApiService, private val dataS
             throw Exception("User not logged in or invalid userId")
         }
     }
+
+    suspend fun getMangaDetails(mangaId: Long): MangaModel {
+        val response = apiService.getOneManga(mangaId)
+        return response
+    }
 }

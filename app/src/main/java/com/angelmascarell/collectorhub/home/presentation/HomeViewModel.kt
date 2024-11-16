@@ -2,7 +2,9 @@ package com.angelmascarell.collectorhub.home.presentation
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +14,8 @@ import com.angelmascarell.collectorhub.data.model.MangaModel
 import com.angelmascarell.collectorhub.data.model.ObtainMangaResponse
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -35,6 +39,14 @@ class HomeViewModel @Inject constructor(
 
     private val _personalizedMangas = mutableStateOf<List<MangaModel>>(emptyList())
     val personalizedMangas: State<List<MangaModel>> = _personalizedMangas
+
+    private val _mangaId = MutableStateFlow<Long?>(null)
+    val mangaId: StateFlow<Long?> get() = _mangaId
+
+    fun setMangaId(id: Long) {
+        Log.d("HomeViewModel", "Manga ID set: $id")
+        _mangaId.value = id
+    }
 
     fun loadPersonalizedMangas() {
         _isLoading.value = true
