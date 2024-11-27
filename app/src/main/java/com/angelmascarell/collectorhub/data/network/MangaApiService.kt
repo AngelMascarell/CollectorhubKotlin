@@ -1,8 +1,12 @@
 package com.angelmascarell.collectorhub.data.network
 
 import com.angelmascarell.collectorhub.data.model.MangaModel
+import com.angelmascarell.collectorhub.data.model.MangaResponseList
 import com.angelmascarell.collectorhub.data.model.ObtainMangaResponse
+import com.angelmascarell.collectorhub.data.model.RateResponseList
+import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface MangaApiService {
@@ -18,4 +22,20 @@ interface MangaApiService {
 
     @GET("manga/{id}")
     suspend fun getOneManga(@Path("id") id : Long) : MangaModel
+
+    @GET("rate/manga/{mangaId}/average")
+    suspend fun getAverageRateByMangaId(@Path("mangaId") mangaId: Long): Int
+
+    @GET("rate/manga/{mangaId}")
+    suspend fun getRatesByMangaId(@Path("mangaId") mangaId: Long): RateResponseList
+
+    @POST("user/add-manga/{mangaId}")
+    suspend fun addMangaToUser(
+        @Path("mangaId") mangaId: Long
+    ): Response<String>
+
+    @GET("user/mangas")
+    suspend fun getUserMangas(): Response<MangaResponseList>
+
+    abstract fun addMangaReview(mangaId: Long, review: String): Response<String>
 }
