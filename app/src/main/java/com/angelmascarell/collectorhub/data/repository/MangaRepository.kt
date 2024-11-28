@@ -4,26 +4,29 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import com.angelmascarell.collectorhub.data.model.MangaModel
+import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
 import com.angelmascarell.collectorhub.data.network.MangaApiService
 import kotlinx.coroutines.flow.first
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
 
-class MangaRepository(private val apiService: MangaApiService, private val dataStore: DataStore<Preferences>) {
+class MangaRepository(
+    private val apiService: MangaApiService,
+    private val dataStore: DataStore<Preferences>
+) {
 
     suspend fun getMangas(): List<MangaModel> {
         val response = apiService.getMangas()
         return response.mangaResponseList
     }
 
-    // Función para obtener el userId guardado en DataStore
     private suspend fun getUserId(): Long {
         val userIdKey = longPreferencesKey("userId")
         return dataStore.data.first()[userIdKey] ?: 0L
     }
 
-    // Función para obtener mangas personalizados
     suspend fun getPersonalizedMangas(): List<MangaModel> {
         val userId = getUserId()
         if (userId != 0L) {
@@ -58,28 +61,32 @@ class MangaRepository(private val apiService: MangaApiService, private val dataS
             if (response.isSuccessful) {
                 val mangaList = response.body()?.mangaResponseList
                 if (mangaList.isNullOrEmpty()) {
-                    // La lista está vacía, no está en la colección
                     false
                 } else {
-                    // Verificar si el mangaId está en la lista de respuestas
                     mangaList.any { it.id == mangaId }
                 }
             } else {
-                // Respuesta no exitosa, tratar como no está en la colección
                 false
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            // En caso de error, tratar como no está en la colección
             false
         }
     }
 
-
-
-    suspend fun addReview(mangaId: Long, review: String): Response<String> {
-        // Lógica para guardar la reseña en el backend
-        return apiService.addMangaReview(mangaId, review)
+    suspend fun addReview(rateModel: RateCreateModel): Response<RateModel> {
+        return try {
+            apiService.addMangaReview(rateModel)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Response.error(500, "Error al enviar la reseña".toResponseBody())
+        }
     }
+
+    suspend fun hasUserReviewed(mangaId: Long): Boolean {
+        val response = apiService.getUserReview(mangaId)
+        return response.isSuccessful && response.body() == true
+    }
+
 
 }

@@ -3,8 +3,11 @@ package com.angelmascarell.collectorhub.data.network
 import com.angelmascarell.collectorhub.data.model.MangaModel
 import com.angelmascarell.collectorhub.data.model.MangaResponseList
 import com.angelmascarell.collectorhub.data.model.ObtainMangaResponse
+import com.angelmascarell.collectorhub.data.model.RateCreateModel
+import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -37,5 +40,9 @@ interface MangaApiService {
     @GET("user/mangas")
     suspend fun getUserMangas(): Response<MangaResponseList>
 
-    abstract fun addMangaReview(mangaId: Long, review: String): Response<String>
+    @POST("rate/new")
+    suspend fun addMangaReview(@Body rateModel: RateCreateModel): Response<RateModel>
+
+    @GET("rate/user-review/{mangaId}")
+    suspend fun getUserReview(@Path("mangaId") mangaId: Long): Response<Boolean>
 }

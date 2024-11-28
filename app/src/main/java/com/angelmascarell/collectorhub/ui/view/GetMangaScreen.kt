@@ -1,10 +1,10 @@
 package com.angelmascarell.collectorhub.ui.view
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
@@ -34,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -52,13 +52,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.data.model.MangaModel
+import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
-import com.angelmascarell.collectorhub.home.presentation.HomeViewModel
 import com.angelmascarell.collectorhub.viewmodel.GetMangaViewModel
-import com.angelmascarell.collectorhub.viewmodel.MangaDetailState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -82,10 +80,11 @@ fun GetMangaScreen() {
     }
 
     when (val currentState = state.value) {
-        is MangaDetailState.Loading -> {
+        is GetMangaViewModel.MangaDetailState.Loading -> {
             CircularProgressIndicator(modifier = Modifier.fillMaxSize())
         }
-        is MangaDetailState.Success -> {
+
+        is GetMangaViewModel.MangaDetailState.Success -> {
             MangaDetailView(
                 mangaDetail = currentState.mangaDetail,
                 navController = navController,
@@ -93,7 +92,8 @@ fun GetMangaScreen() {
                 rates = rates
             )
         }
-        is MangaDetailState.Error -> {
+
+        is GetMangaViewModel.MangaDetailState.Error -> {
             Text(
                 text = "Error: ${currentState.message}",
                 style = MaterialTheme.typography.bodyLarge,
@@ -105,7 +105,12 @@ fun GetMangaScreen() {
 
 
 @Composable
-fun MangaDetailView(mangaDetail: MangaModel, navController: NavHostController, averageRate: Int, rates: List<RateModel>) {
+fun MangaDetailView(
+    mangaDetail: MangaModel,
+    navController: NavHostController,
+    averageRate: Int,
+    rates: List<RateModel>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -214,14 +219,12 @@ fun ActionButtons(mangaId: Long) {
     var reviewText by remember { mutableStateOf("") }
     var initialized by remember { mutableStateOf(false) }
 
-    // Verificar si el manga ya está en la colección al cargar
     LaunchedEffect(mangaId) {
         isInCollection = viewModel.isMangaInCollection(mangaId)
         initialized = true
     }
 
     if (!initialized) {
-        // Mostrar un indicador de carga mientras se verifica el estado inicial
         CircularProgressIndicator(modifier = Modifier.padding(16.dp))
         return
     }
@@ -231,17 +234,24 @@ fun ActionButtons(mangaId: Long) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Botón para "Lo tengo" o "Añadido"
             Button(
                 onClick = {
                     scope.launch {
                         if (!isInCollection) {
                             val response = viewModel.addMangaToUser(mangaId)
                             if (response.isSuccessful) {
-                                Toast.makeText(context, "Manga añadido con éxito", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Manga añadido con éxito",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 isInCollection = true
                             } else {
-                                Toast.makeText(context, "Error al añadir el manga", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Error al añadir el manga",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -256,7 +266,6 @@ fun ActionButtons(mangaId: Long) {
                 )
             }
 
-            // Botón para "Lo quiero"
             Button(
                 onClick = { /* Lógica para "Lo quiero" */ },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
@@ -265,44 +274,149 @@ fun ActionButtons(mangaId: Long) {
             }
         }
 
-        // Campo para escribir la review si el manga ya está en la colección
         if (isInCollection) {
-            TextField(
-                value = reviewText,
-                onValueChange = { reviewText = it },
-                label = { Text("Escribe una review") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+            RateAndCommentSection(
+                mangaId = mangaId,
+                onSuccess = {
+                    Toast.makeText(context, "Reseña enviada con éxito", Toast.LENGTH_SHORT).show()
+                },
+                onError = { errorMessage ->
+                    Toast.makeText(
+                        context,
+                        "Error al enviar la reseña: $errorMessage",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             )
         }
     }
 }
 
-
-
 @Composable
-fun ReviewBox(onSubmit: (String) -> Unit) {
-    var reviewText by remember { mutableStateOf("") }
+fun RateAndCommentSection(
+    mangaId: Long,
+    onSuccess: () -> Unit,
+    onError: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val viewModel: GetMangaViewModel = viewModel()
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        TextField(
-            value = reviewText,
-            onValueChange = { reviewText = it },
-            label = { Text("Escribe tu reseña") },
-            modifier = Modifier.fillMaxWidth()
+    var rating by remember { mutableStateOf(0) }
+    var comment by remember { mutableStateOf("") }
+
+    val reviewState by viewModel.reviewState.observeAsState()
+
+    val hasReviewed by viewModel.hasReviewed.collectAsState()
+
+    LaunchedEffect(mangaId) {
+        viewModel.checkUserReview(mangaId)
+    }
+
+    if (hasReviewed == true) {
+        Text(
+            text = "¡Ya has realizado una reseña!",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(16.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { onSubmit(reviewText) }) {
-            Text("Guardar reseña")
+        return
+    }
+
+    if (hasReviewed == false || hasReviewed == null) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Califica este manga",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                for (i in 1..5) {
+                    Icon(
+                        imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.Star,
+                        contentDescription = "Calificación $i",
+                        tint = if (i <= rating) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable { rating = i }
+                    )
+                }
+            }
+
+            TextField(
+                value = comment,
+                onValueChange = { comment = it },
+                label = { Text("Escribe tu comentario") },
+                placeholder = { Text("¿Qué opinas de este manga?") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+
+            when (val state = reviewState) {
+                is GetMangaViewModel.ReviewState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                }
+
+                is GetMangaViewModel.ReviewState.Success -> {
+                    Toast.makeText(
+                        context,
+                        state.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onSuccess()
+                    viewModel.checkUserReview(mangaId)
+                }
+
+                is GetMangaViewModel.ReviewState.Error -> {
+                    Toast.makeText(
+                        context,
+                        state.error,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onError(state.error)
+                }
+
+                else -> {
+                    Button(
+                        onClick = {
+                            if (rating > 0) {
+                                viewModel.submitReview(
+                                    RateCreateModel(
+                                        mangaId = mangaId,
+                                        rate = rating,
+                                        comment = comment
+                                    )
+                                )
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Por favor, selecciona una calificación",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                        modifier = Modifier.padding(top = 16.dp),
+                        enabled = rating > 0
+                    ) {
+                        Text("Enviar")
+                    }
+                }
+            }
         }
     }
 }
+
+
+
 
 @Composable
 fun MangaRatings(rates: List<RateModel>) {
@@ -321,7 +435,6 @@ fun MangaRatings(rates: List<RateModel>) {
         }
     }
 }
-
 
 @Composable
 fun RateItem(rate: RateModel) {

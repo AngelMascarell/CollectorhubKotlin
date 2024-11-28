@@ -1,28 +1,28 @@
 package com.angelmascarell.collectorhub.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.angelmascarell.collectorhub.data.model.MangaModel
+import com.angelmascarell.collectorhub.data.model.RateCreateModel
+import com.angelmascarell.collectorhub.data.model.RateModel
+import com.angelmascarell.collectorhub.data.model.RateResponseList
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.State
-import androidx.lifecycle.viewModelScope
-import com.angelmascarell.collectorhub.data.model.RateModel
-import com.angelmascarell.collectorhub.data.model.RateResponseList
 import retrofit2.Response
+import javax.inject.Inject
 
 
 @HiltViewModel
-class GetMangaViewModel@Inject constructor(private val mangaApi: MangaRepository) : ViewModel() {
+class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepository) : ViewModel() {
     private val _state = MutableStateFlow<MangaDetailState>(MangaDetailState.Loading)
     val state: StateFlow<MangaDetailState> get() = _state
 
@@ -59,9 +59,7 @@ class GetMangaViewModel@Inject constructor(private val mangaApi: MangaRepository
     fun fetchRatesByMangaId(mangaId: Long) {
         viewModelScope.launch {
             try {
-                // Llamada a la API que devuelve RateResponseList
                 val response: RateResponseList = mangaApi.getRatesByMangaId(mangaId)
-                // Mapeo de RateResponse a RateModel
                 _rates.value = response.rateResponseList.map { rateResponse ->
                     RateModel(
                         id = rateResponse.id,
@@ -73,7 +71,6 @@ class GetMangaViewModel@Inject constructor(private val mangaApi: MangaRepository
                     )
                 }
             } catch (e: Exception) {
-                // Manejar errores y establecer la lista vacía
                 Log.e("RateViewModel", "Error fetching rates", e)
                 _rates.value = emptyList()
             }
@@ -92,10 +89,54 @@ class GetMangaViewModel@Inject constructor(private val mangaApi: MangaRepository
     suspend fun isMangaInCollection(mangaId: Long): Boolean {
         return mangaApi.checkIfMangaInCollection(mangaId)
     }
-}
 
-sealed class MangaDetailState {
-    object Loading : MangaDetailState()
-    data class Success(val mangaDetail: MangaModel) : MangaDetailState()
-    data class Error(val message: String) : MangaDetailState()
+    private val _reviewState = MutableLiveData<ReviewState>()
+    val reviewState: LiveData<ReviewState> get() = _reviewState
+
+    fun submitReview(review: RateCreateModel) {
+        viewModelScope.launch {
+            _reviewState.value = ReviewState.Loading
+            try {
+                val response = mangaApi.addReview(review)
+                if (response.isSuccessful) {
+                    _reviewState.value = ReviewState.Success("Reseña enviada con éxito")
+                    // Actualiza el estado de hasReviewed
+                    _hasReviewed.value = true
+                } else {
+                    _reviewState.value = ReviewState.Error("Error al enviar la reseña")
+                }
+            } catch (e: Exception) {
+                _reviewState.value = ReviewState.Error("Error al enviar la reseña")
+            }
+        }
+    }
+
+
+    private val _hasReviewed = MutableStateFlow<Boolean?>(null)
+    val hasReviewed: StateFlow<Boolean?> get() = _hasReviewed
+
+    fun checkUserReview(mangaId: Long) {
+        viewModelScope.launch {
+            try {
+                val isReviewed = mangaApi.hasUserReviewed(mangaId)
+                _hasReviewed.value = isReviewed
+            } catch (e: Exception) {
+                _hasReviewed.value = null // Manejo de errores si es necesario
+            }
+        }
+    }
+
+
+    sealed class ReviewState {
+        object Loading : ReviewState()
+        data class Success(val message: String) : ReviewState()
+        data class Error(val error: String) : ReviewState()
+        data class UserReviewed(val isReviewed: Boolean) : ReviewState()
+    }
+
+    sealed class MangaDetailState {
+        object Loading : MangaDetailState()
+        data class Success(val mangaDetail: MangaModel) : MangaDetailState()
+        data class Error(val message: String) : MangaDetailState()
+    }
 }
