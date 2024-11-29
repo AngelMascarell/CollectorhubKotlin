@@ -65,6 +65,7 @@ import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.data.model.MangaModel
+import com.angelmascarell.collectorhub.viewmodel.GetMangaViewModel
 import com.angelmascarell.collectorhub.viewmodel.ThemeViewModel
 
 @Composable
@@ -78,6 +79,7 @@ fun HomeScreen() {
         colorScheme = if (isDarkTheme) customDarkColorScheme() else customLightColorScheme()
     ) {
         val homeViewModel: HomeViewModel = hiltViewModel()
+        val mangaViewModel: GetMangaViewModel = hiltViewModel()
 
         var searchQuery by remember { mutableStateOf("") }
         val mangas = homeViewModel.mangas.value
@@ -85,7 +87,6 @@ fun HomeScreen() {
         val isLoading = homeViewModel.isLoading.value
         val errorMessage = homeViewModel.errorMessage.value
 
-        // Llamada para cargar mangas personalizados
         LaunchedEffect(true) {
             homeViewModel.loadPersonalizedMangas()
             homeViewModel.loadMangas()
@@ -126,16 +127,16 @@ fun HomeScreen() {
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-            FirstRowButtons()
+            FirstRowButtons(navController)
             Spacer(modifier = Modifier.height(10.dp))
 
             SearchBar(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
-                onSearch = {
-                    println("Buscando: $searchQuery")
-                }
+                navController = navController,
+                mangaViewModel = mangaViewModel
             )
+
             Spacer(modifier = Modifier.height(10.dp))
 
             if (isLoading) {
@@ -198,28 +199,28 @@ fun HeaderRow() {
         Text(
             text = "CollectorHub",
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground // Asegúrate de usar el color adecuado
+            color = MaterialTheme.colorScheme.onBackground
         )
         IconButton(onClick = { /* Navega al perfil */ }) {
             Icon(
                 painter = painterResource(id = R.drawable.profile),
                 contentDescription = "Perfil",
                 modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.onBackground // Color del icono de perfil
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     }
 }
 
 @Composable
-fun FirstRowButtons() {
+fun FirstRowButtons(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        HomeButton("Colección", R.drawable.libros, Modifier.weight(1f)) { }
+        HomeButton("Colección", R.drawable.libros, Modifier.weight(1f)) {navController.navigate(Routes.CollectionScreenRoute.route)}
         HomeButton("Futuros", R.drawable.anadir, Modifier.weight(1f)) { }
         HomeButton("Novedades", R.drawable.novedoso, Modifier.weight(1f)) { }
     }
@@ -260,9 +261,10 @@ fun HomeButton(text: String, iconRes: Int, modifier: Modifier = Modifier, onClic
 fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    onSearch: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavHostController, mangaViewModel: GetMangaViewModel
 ) {
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -290,7 +292,15 @@ fun SearchBar(
             ),
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { onSearch() })
+            keyboardActions = KeyboardActions(onSearch = {
+                mangaViewModel.searchMangaByName(query) { mangaId ->
+                    if (mangaId != null) {
+                        navController.navigate("GetMangaScreen/${mangaId}")
+                    } else {
+                        navController.navigate(Routes.ErrorScreenRoute.route)
+                    }
+                }
+            })
         )
         if (query.isNotEmpty()) {
             IconButton(onClick = { onQueryChange("") }) {
@@ -304,18 +314,18 @@ fun SearchBar(
     }
 }
 
+
 @Composable
 fun MangaSlider(
     mangas: List<MangaModel>,
     modifier: Modifier = Modifier,
-    navController: NavHostController,mangaViewModel: HomeViewModel
+    navController: NavHostController, mangaViewModel: HomeViewModel
 ) {
-    // Asegúrate de que la lista no esté vacía antes de mostrar el slider
     if (mangas.isNotEmpty()) {
         LazyRow(
             modifier = modifier,
             contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp) // Espaciado entre las imágenes
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(mangas) { manga ->
                 MangaImage(
@@ -323,13 +333,12 @@ fun MangaSlider(
                     onClick = {
                         Log.d("MangaSlider", "Selected manga ID: ${manga.id}")
                         mangaViewModel.setMangaId(manga.id)
-                        navController.navigate("GetMangaScreen/${manga.id}")  // Pasamos el mangaId en la ruta
+                        navController.navigate("GetMangaScreen/${manga.id}")
                     }
                 )
             }
         }
     } else {
-        // Mostrar un mensaje si no hay mangas disponibles
         Text(
             text = "No hay mangas disponibles",
             modifier = Modifier.fillMaxWidth(),
@@ -351,15 +360,15 @@ fun MangaImage(manga: MangaModel, onClick: () -> Unit) {
         modifier = Modifier
             .width(170.dp)
             .height(220.dp)
-            .clip(RoundedCornerShape(16.dp)) // Bordes redondeados
+            .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable { onClick() } // Detectar el clic y ejecutar la navegación
+            .clickable { onClick() }
     ) {
         Image(
-            painter = rememberAsyncImagePainter(imageUrl), // Usando Coil o Glide para cargar imágenes
+            painter = rememberAsyncImagePainter(imageUrl),
             contentDescription = manga.title,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop // La imagen se recortará para llenar el área sin deformarse
+            contentScale = ContentScale.Crop
         )
     }
 }
@@ -369,19 +378,18 @@ fun MangaImage(manga: MangaModel, onClick: () -> Unit) {
 fun PremiumAdBanner(onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .fillMaxWidth() // Ocupa todo el ancho de la pantalla
-            .aspectRatio(3f) // Relación de aspecto ancho:alto
-            .clip(RoundedCornerShape(10.dp)) // Sin bordes redondeados (opcional, puedes cambiarlos)
+            .fillMaxWidth()
+            .aspectRatio(3f)
+            .clip(RoundedCornerShape(10.dp))
             .background(
                 brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
                     listOf(
-                        Color(0xFFFDBB2D), // Amarillo oro
-                        Color(0xFFE85D04), // Naranja intenso
+                        Color(0xFFFDBB2D),
+                        Color(0xFFE85D04),
                     )
                 )
             )
     ) {
-        // Contenido del banner
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -408,21 +416,21 @@ fun PremiumAdBanner(onClick: () -> Unit) {
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6A0572) // Botón violeta intenso
+                    containerColor = Color(0xFF6A0572)
                 ),
                 modifier = Modifier
-                    .weight(1.2f) // Ajusta el ancho relativo
-                    .height(48.dp), // Altura fija más pequeña
-                shape = RoundedCornerShape(10.dp), // Esquinas completamente rectas
+                    .weight(1.2f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(10.dp),
                 contentPadding = PaddingValues(
                     horizontal = 10.dp,
                     vertical = 8.dp
-                ) // Reduce el padding interno
+                )
             ) {
                 Text(
                     "Suscribirse",
                     color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium // Asegúrate de usar un estilo adecuado
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
@@ -433,13 +441,13 @@ fun PremiumAdBanner(onClick: () -> Unit) {
 fun AdBanner() {
     Box(
         modifier = Modifier
-            .fillMaxWidth() // Asegura que ocupe todo el ancho
+            .fillMaxWidth()
             .padding(8.dp)
             .background(
                 Color(0xFFFFA500),
                 RoundedCornerShape(8.dp)
-            ) // Color de fondo y bordes redondeados
-            .height(60.dp) // Altura del banner
+            )
+            .height(60.dp)
     ) {
         Row(
             modifier = Modifier
@@ -448,7 +456,6 @@ fun AdBanner() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            // Texto o contenido del anuncio
             Text(
                 text = "¡Anuncio Premium!",
                 color = Color.White,
@@ -456,9 +463,8 @@ fun AdBanner() {
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            // Aquí va la imagen del anuncio
             Image(
-                painter = painterResource(id = R.drawable.libros), // Reemplaza con el ícono de tu anuncio
+                painter = painterResource(id = R.drawable.libros),
                 contentDescription = "Publicidad",
                 modifier = Modifier.size(32.dp)
             )
@@ -470,31 +476,31 @@ fun AdBanner() {
 @Composable
 fun customDarkColorScheme(): ColorScheme {
     return darkColorScheme(
-        primary = Color(0xFFBB86FC), // Personaliza el color principal
-        onPrimary = Color.White, // Color del texto en el color principal
-        secondary = Color(0xFF03DAC6), // Personaliza el color secundario
-        onSecondary = Color.Black, // Color del texto en el color secundario
-        background = Color(0xFF121212), // Fondo oscuro personalizado
-        onBackground = Color.White, // Color del texto en el fondo oscuro
-        surface = Color(0xFF121212), // Fondo de las superficies
-        onSurface = Color.White, // Color del texto en las superficies
-        error = Color(0xFFCF6679), // Error color
-        onError = Color.Black, // Texto del error
+        primary = Color(0xFFBB86FC),
+        onPrimary = Color.White,
+        secondary = Color(0xFF03DAC6),
+        onSecondary = Color.Black,
+        background = Color(0xFF121212),
+        onBackground = Color.White,
+        surface = Color(0xFF121212),
+        onSurface = Color.White,
+        error = Color(0xFFCF6679),
+        onError = Color.Black,
     )
 }
 
 @Composable
 fun customLightColorScheme(): ColorScheme {
     return lightColorScheme(
-        primary = Color(0xFF6200EE), // Color primario
-        onPrimary = Color.White, // Texto sobre el color primario
-        secondary = Color(0xFF03DAC6), // Color secundario
-        onSecondary = Color.Black, // Texto sobre el color secundario
-        background = Color.White, // Fondo claro
-        onBackground = Color.Black, // Texto sobre el fondo claro
-        surface = Color(0xFFFFFFFF), // Fondo de las superficies
-        onSurface = Color.Black, // Texto sobre las superficies
-        error = Color(0xFFB00020), // Color de error
-        onError = Color.White, // Texto sobre el error
+        primary = Color(0xFF6200EE),
+        onPrimary = Color.White,
+        secondary = Color(0xFF03DAC6),
+        onSecondary = Color.Black,
+        background = Color.White,
+        onBackground = Color.Black,
+        surface = Color(0xFFFFFFFF),
+        onSurface = Color.Black,
+        error = Color(0xFFB00020),
+        onError = Color.White,
     )
 }

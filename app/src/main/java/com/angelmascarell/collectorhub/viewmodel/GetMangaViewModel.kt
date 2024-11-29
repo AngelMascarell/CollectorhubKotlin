@@ -100,7 +100,6 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
                 val response = mangaApi.addReview(review)
                 if (response.isSuccessful) {
                     _reviewState.value = ReviewState.Success("Reseña enviada con éxito")
-                    // Actualiza el estado de hasReviewed
                     _hasReviewed.value = true
                 } else {
                     _reviewState.value = ReviewState.Error("Error al enviar la reseña")
@@ -121,8 +120,18 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
                 val isReviewed = mangaApi.hasUserReviewed(mangaId)
                 _hasReviewed.value = isReviewed
             } catch (e: Exception) {
-                _hasReviewed.value = null // Manejo de errores si es necesario
+                _hasReviewed.value = null
             }
+        }
+    }
+
+    private val _searchResult = MutableStateFlow<MangaModel?>(null)
+    val searchResult: StateFlow<MangaModel?> = _searchResult
+
+    fun searchMangaByName(name: String, onResult: (Long?) -> Unit) {
+        viewModelScope.launch {
+            val manga = mangaApi.getMangaByTitle(name)
+            onResult(manga?.id)
         }
     }
 

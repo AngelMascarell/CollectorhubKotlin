@@ -14,8 +14,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.angelmascarell.collectorhub.signin.presentation.SignInScreen
 import com.angelmascarell.collectorhub.home.presentation.HomeScreen
+import com.angelmascarell.collectorhub.signin.presentation.SignInScreen
+import com.angelmascarell.collectorhub.ui.view.CollectionScreen
+import com.angelmascarell.collectorhub.ui.view.ErrorScreen
 import com.angelmascarell.collectorhub.ui.view.GetMangaScreen
 import com.angelmascarell.collectorhub.ui.view.PremiumScreen
 
@@ -53,11 +55,11 @@ fun AppNavigation(appNavigationViewModel: AppNavigationViewModel = hiltViewModel
                 composable(route = Routes.GetMangaScreenRoute.route) {
                     GetMangaScreen()
                 }
-                composable(route = Routes.RoomDetailsScreenRoute.route) {
-                    //RoomDetailsScreen()
+                composable(route = Routes.ErrorScreenRoute.route) {
+                    ErrorScreen()
                 }
-                composable(route = Routes.BookingSummaryScreenRoute.route) {
-                    //BookingSummaryScreen()
+                composable(route = Routes.CollectionScreenRoute.route) {
+                    CollectionScreen()
                 }
                 composable(route = Routes.PaymentGatewayScreenRoute.route) {
                     //PaymentGatewayScreen()

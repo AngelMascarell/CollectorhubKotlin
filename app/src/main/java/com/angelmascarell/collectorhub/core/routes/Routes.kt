@@ -4,6 +4,8 @@ sealed class Routes(val route: String) {
     object SignInScreenRoute : Routes("signInScreen")
     object HomeScreenRoute : Routes("HomeScreen")
     object PremiumScreenRoute : Routes("PremiumScreen")
+    object ErrorScreenRoute : Routes("ErrorScreen")
+    object CollectionScreenRoute : Routes("CollectionScreen")
     object GetMangaScreenRoute : Routes("GetMangaScreen/{mangaId}")
 
 

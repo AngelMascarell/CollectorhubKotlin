@@ -11,6 +11,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface MangaApiService {
 
@@ -45,4 +46,8 @@ interface MangaApiService {
 
     @GET("rate/user-review/{mangaId}")
     suspend fun getUserReview(@Path("mangaId") mangaId: Long): Response<Boolean>
+
+    @GET("manga/search")
+    suspend fun searchMangaByTitle(@Query("name") name: String): MangaModel
+
 }

@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import com.angelmascarell.collectorhub.data.model.MangaModel
+import com.angelmascarell.collectorhub.data.model.MangaResponseList
 import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
@@ -88,5 +89,25 @@ class MangaRepository(
         return response.isSuccessful && response.body() == true
     }
 
+    suspend fun getMangaByTitle(title: String): MangaModel? {
+        return try {
+            apiService.searchMangaByTitle(title)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 
+    suspend fun getUserMangas(): MangaResponseList {
+        return try {
+            val response = apiService.getUserMangas()
+            if (response.isSuccessful) {
+                response.body() ?: throw Exception("Respuesta vacía de la API")
+            } else {
+                throw Exception("Error en la llamada a la API: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            throw Exception("Error al obtener los mangas del usuario", e)
+        }
+    }
 }
