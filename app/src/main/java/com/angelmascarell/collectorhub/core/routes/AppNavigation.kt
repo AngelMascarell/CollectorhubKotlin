@@ -1,5 +1,7 @@
 package com.angelmascarell.collectorhub.core.routes
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -20,10 +22,13 @@ import com.angelmascarell.collectorhub.ui.view.CollectionScreen
 import com.angelmascarell.collectorhub.ui.view.ErrorScreen
 import com.angelmascarell.collectorhub.ui.view.GetMangaScreen
 import com.angelmascarell.collectorhub.ui.view.PremiumScreen
+import com.angelmascarell.collectorhub.ui.view.ProfileScreen
+import com.angelmascarell.collectorhub.ui.view.SignUpScreen
 
 // Global variable
 val LocalNavController = compositionLocalOf<NavHostController> { error("No NavController found!") }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(appNavigationViewModel: AppNavigationViewModel = hiltViewModel()) {
     val navController = rememberNavController()
@@ -61,17 +66,11 @@ fun AppNavigation(appNavigationViewModel: AppNavigationViewModel = hiltViewModel
                 composable(route = Routes.CollectionScreenRoute.route) {
                     CollectionScreen()
                 }
-                composable(route = Routes.PaymentGatewayScreenRoute.route) {
-                    //PaymentGatewayScreen()
-                }
-                composable(route = Routes.PaidScreenRoute.route) {
-                    //PaidScreen()
-                }
                 composable(route = Routes.ProfileScreenRoute.route) {
-                    //ProfileScreen()
+                    ProfileScreen()
                 }
-                composable(route = Routes.MyBookingsScreenRoute.route) {
-                    //MyBookingsScreen()
+                composable(route = Routes.SignUpScreenRoute.route) {
+                    SignUpScreen()
                 }
             }
         }

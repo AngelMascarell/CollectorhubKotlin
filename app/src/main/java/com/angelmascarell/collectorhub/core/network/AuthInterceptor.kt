@@ -1,9 +1,6 @@
 package com.angelmascarell.collectorhub.core.network
 
 import com.angelmascarell.collectorhub.data.local.TokenManager
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
@@ -13,16 +10,13 @@ class AuthInterceptor @Inject constructor(
     private val tokenManager: TokenManager
 ) : Interceptor {
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun intercept(chain: Interceptor.Chain): Response {
-        var token = ""
-
-        // Usar un coroutine para obtener el token asincrónicamente
-        GlobalScope.launch {
-            token = tokenManager.getToken()
+        // Obtener el token de forma sincrónica
+        val token = kotlinx.coroutines.runBlocking {
+            tokenManager.getToken()
         }
 
-        // Si el token no está vacío, agregarlo a la cabecera
+        // Construir la solicitud con el token, si está disponible
         val originalRequest: Request = chain.request()
         val requestBuilder = originalRequest.newBuilder()
 
@@ -32,7 +26,8 @@ class AuthInterceptor @Inject constructor(
 
         val request: Request = requestBuilder.build()
 
-        // Continuar la solicitud
+        // Continuar con la solicitud
         return chain.proceed(request)
     }
 }
+

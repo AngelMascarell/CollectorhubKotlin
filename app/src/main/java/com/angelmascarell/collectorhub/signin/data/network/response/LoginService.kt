@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.angelmascarell.collectorhub.signin.data.network.request.HomeRequest
+import com.angelmascarell.collectorhub.home.data.network.request.HomeRequest
 import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.home.data.network.response.HomeClient
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +30,7 @@ class LoginService @Inject constructor(
                     val loginResponse = response.body()
                     if (loginResponse != null) {
                         saveTokensToDataStore(loginResponse.accessToken)
-                        return@withContext Routes.HomeScreenRoute.route // Ruta deseada para usuarios autenticados
+                        return@withContext Routes.HomeScreenRoute.route
                     } else {
                         Log.e("doSignIn", "LoginModel is null")
                     }

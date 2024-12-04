@@ -1,5 +1,5 @@
 
-package com.angelmascarell.collectorhub.signin.data.network.request
+package com.angelmascarell.collectorhub.home.data.network.request
 import com.google.gson.annotations.SerializedName
 
 data class HomeRequest(

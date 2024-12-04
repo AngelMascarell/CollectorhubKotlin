@@ -123,7 +123,7 @@ fun HomeScreen() {
                     )
                 }
 
-                HeaderRow()
+                HeaderRow(navController)
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -188,7 +188,7 @@ fun HomeScreen() {
 }
 
 @Composable
-fun HeaderRow() {
+fun HeaderRow(navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -201,7 +201,7 @@ fun HeaderRow() {
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
-        IconButton(onClick = { /* Navega al perfil */ }) {
+        IconButton(onClick = { navController.navigate(Routes.ProfileScreenRoute.route) }) {
             Icon(
                 painter = painterResource(id = R.drawable.profile),
                 contentDescription = "Perfil",

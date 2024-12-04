@@ -9,11 +9,15 @@ import androidx.datastore.preferences.core.Preferences
 import com.angelmascarell.collectorhub.core.network.AuthInterceptor
 import com.angelmascarell.collectorhub.data.local.TokenManager
 import com.angelmascarell.collectorhub.data.network.MangaApiService
+import com.angelmascarell.collectorhub.data.network.SignUpService
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
+import com.angelmascarell.collectorhub.data.repository.SignUpRepository
 import com.angelmascarell.collectorhub.home.data.network.response.HomeClient
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,13 +43,17 @@ object NetworkModule {
     @Singleton
     @Provides
     fun provideGson(): Gson {
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd") // Ajusta el formato si es necesario
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         return GsonBuilder()
             .registerTypeAdapter(LocalDate::class.java, JsonDeserializer { json, _, _ ->
                 LocalDate.parse(json.asString, dateFormatter)
             })
+            .registerTypeAdapter(LocalDate::class.java, JsonSerializer<LocalDate> { src, _, _ ->
+                JsonPrimitive(src.format(dateFormatter))
+            })
             .create()
     }
+
 
     @Singleton
     @Provides
@@ -77,19 +85,19 @@ object NetworkModule {
 
 
 
-
     @Singleton
     @Provides
     @Named(WITHOUT_HEADER)
-    fun provideRetrofitWithoutHeader(): Retrofit {
+    fun provideRetrofitWithoutHeader(gson: Gson): Retrofit {
         val httpClient = OkHttpClient.Builder().build()
 
         return Retrofit.Builder()
             .baseUrl("http://10.0.2.2:8080/")
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(httpClient)
             .build()
     }
+
 
     @Provides
     @Singleton
@@ -101,10 +109,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://10.0.2.2:8080/")
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(okHttpClient)
             .build()
     }
@@ -124,9 +132,9 @@ object NetworkModule {
     @Provides
     fun provideMangaRepository(
         apiService: MangaApiService,
-        dataStore: DataStore<Preferences>  // Agregar DataStore como parámetro
+        dataStore: DataStore<Preferences>
     ): MangaRepository {
-        return MangaRepository(apiService, dataStore)  // Pasar DataStore al constructor
+        return MangaRepository(apiService, dataStore)
     }
 
 
@@ -135,6 +143,22 @@ object NetworkModule {
     fun provideMangaApiService(@Named(WITH_HEADER) retrofit: Retrofit): MangaApiService {
         return retrofit.create(MangaApiService::class.java)
     }
+
+    @Singleton
+    @Provides
+    fun provideSignUpService(@Named(WITHOUT_HEADER) retrofit: Retrofit): SignUpService {
+        return retrofit.create(SignUpService::class.java)
+    }
+
+    @Provides
+    fun provideSignUpRepository(
+        apiService: SignUpService,
+        dataStore: DataStore<Preferences>
+    ): SignUpRepository {
+        return SignUpRepository(apiService, dataStore)
+    }
+
+
 
 
 /*    @Provides

@@ -308,10 +308,6 @@ fun GenreDoughnutChart(genresCount: Map<String, Int>, modifier: Modifier = Modif
 }
 
 
-
-
-
-
 @Composable
 fun GenreLegend(genresCount: Map<String, Int>, modifier: Modifier = Modifier) {
     val colors = listOf(

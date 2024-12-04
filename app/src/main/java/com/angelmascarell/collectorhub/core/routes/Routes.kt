@@ -6,6 +6,7 @@ sealed class Routes(val route: String) {
     object PremiumScreenRoute : Routes("PremiumScreen")
     object ErrorScreenRoute : Routes("ErrorScreen")
     object CollectionScreenRoute : Routes("CollectionScreen")
+    object ProfileScreenRoute : Routes("ProfileScreen")
     object GetMangaScreenRoute : Routes("GetMangaScreen/{mangaId}")
 
 
@@ -23,7 +24,6 @@ sealed class Routes(val route: String) {
 
     object PaymentGatewayScreenRoute : Routes("paymentGatewayScreen")
     object PaidScreenRoute : Routes("paidScreen")
-    object ProfileScreenRoute : Routes("profileScreen")
     object MyBookingsScreenRoute : Routes("myBookingsScreen")
     object ForgotPasswordScreenRoute : Routes("forgotPasswordScreen")
 }

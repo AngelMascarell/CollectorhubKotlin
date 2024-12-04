@@ -8,6 +8,7 @@ import com.angelmascarell.collectorhub.data.model.MangaResponseList
 import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
+import com.angelmascarell.collectorhub.data.model.UserModel
 import com.angelmascarell.collectorhub.data.network.MangaApiService
 import kotlinx.coroutines.flow.first
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -109,5 +110,9 @@ class MangaRepository(
         } catch (e: Exception) {
             throw Exception("Error al obtener los mangas del usuario", e)
         }
+    }
+
+    suspend fun getUserProfile(): UserModel {
+        return apiService.searchUserById()
     }
 }

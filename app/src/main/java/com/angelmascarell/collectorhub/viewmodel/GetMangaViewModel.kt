@@ -23,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepository) : ViewModel() {
+
     private val _state = MutableStateFlow<MangaDetailState>(MangaDetailState.Loading)
     val state: StateFlow<MangaDetailState> get() = _state
 

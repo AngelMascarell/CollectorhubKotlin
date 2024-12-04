@@ -1,5 +1,7 @@
 package com.angelmascarell.collectorhub.data.model
 
+import java.time.LocalDate
+
 data class MangaModel(
     val id: Long,
     val title: String,
@@ -7,5 +9,7 @@ data class MangaModel(
     val genreId: Long,
     val chapters: Int,
     val completed: Boolean,
-    val imageUrl: String
+    val imageUrl: String,
+    val synopsis: String,
+    val releaseDate: LocalDate,
 )

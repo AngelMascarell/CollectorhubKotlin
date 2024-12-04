@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
@@ -58,6 +59,7 @@ import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.viewmodel.GetMangaViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @Composable
 fun GetMangaScreen() {
@@ -103,7 +105,6 @@ fun GetMangaScreen() {
     }
 }
 
-
 @Composable
 fun MangaDetailView(
     mangaDetail: MangaModel,
@@ -118,26 +119,51 @@ fun MangaDetailView(
     ) {
         CloseButton(navController)
 
-        MangaImage(imageUrl = "http://10.0.2.2:8080${mangaDetail.imageUrl}")
+        Spacer(modifier = Modifier.height(16.dp))
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            MangaImage(
+                imageUrl = "http://10.0.2.2:8080${mangaDetail.imageUrl}",
+                modifier = Modifier
+                    .weight(0.4f)
+                    .height(200.dp)
+            )
+
+            Spacer(modifier = Modifier.width((-16).dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(0.6f)
+                    .align(Alignment.CenterVertically)
+            ) {
+                MangaAuthorAndReleaseDate(mangaDetail.author, mangaDetail.releaseDate)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
         MangaTitle(title = mangaDetail.title)
-        MangaAuthor(author = mangaDetail.author)
-        MangaSynopsis(synopsis = mangaDetail.imageUrl ?: "Sinopsis no disponible.")
+        Spacer(modifier = Modifier.height(12.dp))
+        MangaSynopsis(synopsis = mangaDetail.synopsis ?: "Sinopsis no disponible.")
+        Spacer(modifier = Modifier.height(16.dp))
         AverageRating(averageRate = averageRate)
+        Spacer(modifier = Modifier.height(12.dp))
         ActionButtons(mangaId = mangaDetail.id)
+        Spacer(modifier = Modifier.height(12.dp))
         MangaRatings(rates = rates)
     }
 }
 
 @Composable
-fun MangaImage(imageUrl: String) {
+fun MangaImage(imageUrl: String, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
+        modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
+            //.background(MaterialTheme.colorScheme.surface)
+            //.shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
     ) {
         Image(
             painter = rememberAsyncImagePainter(imageUrl),
@@ -147,6 +173,7 @@ fun MangaImage(imageUrl: String) {
         )
     }
 }
+
 
 @Composable
 fun MangaTitle(title: String) {
@@ -161,14 +188,49 @@ fun MangaTitle(title: String) {
 }
 
 @Composable
-fun MangaAuthor(author: String) {
-    Text(
-        text = "Autor: $author",
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.secondary
-    )
+fun MangaAuthorAndReleaseDate(author: String, releaseDate: LocalDate) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Autor:",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = author,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Black,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.DateRange,
+                contentDescription = "Ícono de Calendario",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = releaseDate.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                lineHeight = 20.sp
+            )
+        }
+    }
 }
+
 
 @Composable
 fun MangaSynopsis(synopsis: String) {
@@ -180,12 +242,13 @@ fun MangaSynopsis(synopsis: String) {
     Spacer(modifier = Modifier.height(8.dp))
     Text(
         text = synopsis,
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onBackground,
         lineHeight = 20.sp,
         modifier = Modifier.fillMaxWidth()
     )
 }
+
 
 @Composable
 fun AverageRating(averageRate: Int) {
@@ -196,7 +259,8 @@ fun AverageRating(averageRate: Int) {
         Text(
             text = "Valoración media: ",
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.width(8.dp))
         repeat(averageRate) {

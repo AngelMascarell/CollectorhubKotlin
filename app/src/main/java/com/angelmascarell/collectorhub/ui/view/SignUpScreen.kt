@@ -1,6 +1,9 @@
-package com.angelmascarell.collectorhub.signin.presentation
+package com.angelmascarell.collectorhub.ui.view
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,11 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,30 +32,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.composable.MyButton
-import com.angelmascarell.collectorhub.ui.theme.CollectorHubTheme
-import com.angelmascarell.collectorhub.ui.theme.MyUltraBlue
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
-import com.angelmascarell.collectorhub.core.composable.MyBasicTextField
-import com.angelmascarell.collectorhub.home.presentation.HomeViewModel
+import com.angelmascarell.collectorhub.signin.presentation.EmailTextField
+import com.angelmascarell.collectorhub.signin.presentation.PasswordTextField
+import com.angelmascarell.collectorhub.signin.presentation.UsernameTextField
+import com.angelmascarell.collectorhub.ui.theme.MySoftBlue
+import com.angelmascarell.collectorhub.ui.theme.MyUltraBlue
+import com.angelmascarell.collectorhub.viewmodel.SignUpViewModel
+import java.time.LocalDate
+import java.util.Calendar
 
-
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SignInScreen() {
+fun SignUpScreen() {
     val navController = LocalNavController.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            //.background(MySoftBlue)
+            .background(MySoftBlue)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -81,7 +84,7 @@ fun Header() {
         Text(
             text = buildAnnotatedString {
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
-                    append("Welcome ")
+                    append("Create ")
                 }
                 withStyle(
                     style = SpanStyle(
@@ -89,25 +92,31 @@ fun Header() {
                         color = MyUltraBlue
                     )
                 ) {
-                    append("Back")
+                    append("Account")
                 }
             },
             fontSize = 30.sp
         )
         Text(
-            text = "Login to proceed with us",
+            text = "Sign up to get started",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp, start = 57.dp, end = 57.dp)
+                .padding(top = 16.dp, bottom = 16.dp, start = 71.dp, end = 57.dp)
                 .align(Alignment.CenterHorizontally),
             color = Color.Gray
         )
+
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Body(navController: NavController, signInViewModel: SignInViewModel = hiltViewModel()) {
+fun Body(navController: NavController) {
+
+    val signUpViewModel: SignUpViewModel = hiltViewModel()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,57 +124,53 @@ fun Body(navController: NavController, signInViewModel: SignInViewModel = hiltVi
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        val username by signInViewModel.username.observeAsState("")
-        val password by signInViewModel.password.observeAsState("")
+        val username by signUpViewModel.username.observeAsState("")
+        val email by signUpViewModel.email.observeAsState("")
+        val password by signUpViewModel.password.observeAsState("")
+        val birthdate by signUpViewModel.birthdate.observeAsState(null)
 
-        EmailTextField(value = username) {
-            signInViewModel.onSignInChanged(username = it, password = password)
+        UsernameTextField(value = username) {
+            signUpViewModel.onSignUpChanged(username = it, email = email, password = password, birthdate = birthdate)
         }
+
+        EmailTextField(value = email) {
+            signUpViewModel.onSignUpChanged(username = username, email = it, password = password, birthdate = birthdate)
+        }
+
         PasswordTextField(value = password) {
-            signInViewModel.onSignInChanged(username = username, password = it)
+            signUpViewModel.onSignUpChanged(username = username, email = email, password = it, birthdate = birthdate)
         }
 
-        Spacer(modifier = Modifier.padding(vertical = 5.dp))
-
-        Text(
-            text = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        textDecoration = TextDecoration.Underline,
-                        color = MyUltraBlue
-                    )
-                ) {
-                    append("Forgot password?")
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .clickable {
-                    navController.navigate(Routes.ForgotPasswordScreenRoute.route)
-                },
-            color = Color.Gray
+        BirthdatePicker(
+            birthdate = birthdate,
+            onBirthdateChanged = {
+                signUpViewModel.onSignUpChanged(username = username, email = email, password = password, birthdate = it)
+            }
         )
 
+        Spacer(modifier = Modifier.padding(vertical = 10.dp))
+
         val context = LocalContext.current
-        MyButton(text = "Login") {
-            signInViewModel.login { loginResult ->
-                if (loginResult) {
-                    navController.navigate(Routes.HomeScreenRoute.route)
+        MyButton(text = "Sign Up") {
+            signUpViewModel.signUp { isSuccess, errorMessage ->
+                if (isSuccess) {
+                    Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
+                    navController.navigate(Routes.SignInScreenRoute.route)
                 } else {
-                    Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                    errorMessage?.let {
+                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
         }
 
         Text(
-            text = "--- Or continue with ---",
-            color = Color.Gray,
+            text = "--- Or sign up with ---",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center, color = Color.Gray
         )
 
         Row(
@@ -176,10 +181,38 @@ fun Body(navController: NavController, signInViewModel: SignInViewModel = hiltVi
         ) {
             Image(painter = painterResource(id = R.drawable.google), contentDescription = null)
             Image(painter = painterResource(id = R.drawable.facebook), contentDescription = null)
-
         }
     }
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun BirthdatePicker(
+    birthdate: LocalDate?,
+    onBirthdateChanged: (LocalDate?) -> Unit
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val year = birthdate?.year ?: calendar.get(Calendar.YEAR)
+    val month = birthdate?.monthValue?.minus(1) ?: calendar.get(Calendar.MONTH)
+    val day = birthdate?.dayOfMonth ?: calendar.get(Calendar.DAY_OF_MONTH)
+
+    val datePickerDialog = android.app.DatePickerDialog(
+        context,
+        { _, selectedYear, selectedMonth, selectedDay ->
+            onBirthdateChanged(LocalDate.of(selectedYear, selectedMonth + 1, selectedDay))
+        },
+        year,
+        month,
+        day
+    )
+
+    OutlinedButton(onClick = { datePickerDialog.show() }) {
+        Text(text = birthdate?.toString() ?: "Select Birthdate")
+    }
+}
+
 
 @Composable
 fun Footer(navController: NavController) {
@@ -198,57 +231,20 @@ fun Footer(navController: NavController) {
                         fontSize = 15.sp
                     )
                 ) {
-                    append("Does not have an account? ")
+                    append("Already have an account? ")
                 }
                 withStyle(
                     style = SpanStyle(
                         textDecoration = TextDecoration.Underline,
-                        color = MyUltraBlue, fontWeight = FontWeight.Bold, fontSize = 15.sp
+                        color = MyUltraBlue,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
                     )
                 ) {
-                    append("Sign Up")
+                    append("Login")
                 }
             },
-            modifier = Modifier.clickable { navController.navigate(Routes.SignUpScreenRoute.route) }
+            modifier = Modifier.clickable { navController.navigate(Routes.SignInScreenRoute.route) }
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SignInScreenPreview() {
-    CollectorHubTheme {
-
-    }
-}
-
-@Composable
-fun EmailTextField(value: String, onTextChanged: (String) -> Unit) {
-    MyBasicTextField(
-        value = value,
-        label = "Email",
-        onTextChanged = onTextChanged,
-        imageVector = Icons.Default.Email
-    )
-}
-
-@Composable
-fun UsernameTextField(value: String, onTextChanged: (String) -> Unit) {
-    MyBasicTextField(
-        value = value,
-        label = "Email",
-        onTextChanged = onTextChanged,
-        imageVector = Icons.Default.AccountCircle
-    )
-}
-
-@Composable
-fun PasswordTextField(value: String, onTextChanged: (String) -> Unit) {
-    MyBasicTextField(
-        value = value,
-        label = "Password",
-        onTextChanged = onTextChanged,
-        imageVector = Icons.Default.Lock,
-        password = true
-    )
 }
