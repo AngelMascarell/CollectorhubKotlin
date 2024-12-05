@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -84,12 +85,14 @@ fun HomeScreen() {
         var searchQuery by remember { mutableStateOf("") }
         val mangas = homeViewModel.mangas.value
         val personalizedMangas = homeViewModel.personalizedMangas.value
+        val user = homeViewModel.authenticatedUser.value
         val isLoading = homeViewModel.isLoading.value
         val errorMessage = homeViewModel.errorMessage.value
 
-        LaunchedEffect(true) {
+        LaunchedEffect(Unit) {
             homeViewModel.loadPersonalizedMangas()
             homeViewModel.loadMangas()
+            homeViewModel.fetchAuthenticatedUser()
         }
 
         Column(
@@ -123,7 +126,9 @@ fun HomeScreen() {
                     )
                 }
 
-                HeaderRow(navController)
+                if (user != null) {
+                    HeaderRow(navController, userImageUrl = user.profileImageUrl)
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -144,7 +149,11 @@ fun HomeScreen() {
             }
 
             errorMessage?.let {
-                Text(text = it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
 
             Text(
@@ -176,8 +185,7 @@ fun HomeScreen() {
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!isLoading && mangas.isNotEmpty()) {
-                MangaSlider(mangas = mangas, navController = navController, mangaViewModel = homeViewModel
-                )
+                MangaSlider(mangas = mangas, navController = navController, mangaViewModel = homeViewModel)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -187,8 +195,10 @@ fun HomeScreen() {
     }
 }
 
+
 @Composable
-fun HeaderRow(navController: NavHostController) {
+fun HeaderRow(navController: NavHostController, userImageUrl: String?) {
+    val url = "http://10.0.2.2:8080${userImageUrl}"
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -202,15 +212,33 @@ fun HeaderRow(navController: NavHostController) {
             color = MaterialTheme.colorScheme.onBackground
         )
         IconButton(onClick = { navController.navigate(Routes.ProfileScreenRoute.route) }) {
-            Icon(
-                painter = painterResource(id = R.drawable.profile),
-                contentDescription = "Perfil",
-                modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.onBackground
-            )
+            if (!userImageUrl.isNullOrEmpty()) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = url,
+                        placeholder = painterResource(id = R.drawable.profile),
+                        error = painterResource(id = R.drawable.libros)
+                    ),
+                    contentDescription = "Perfil",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.background),
+                    contentScale = ContentScale.Crop
+                )
+
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "Perfil",
+                    modifier = Modifier.size(28.dp),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun FirstRowButtons(navController: NavHostController) {
@@ -220,9 +248,9 @@ fun FirstRowButtons(navController: NavHostController) {
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        HomeButton("Colección", R.drawable.libros, Modifier.weight(1f)) {navController.navigate(Routes.CollectionScreenRoute.route)}
-        HomeButton("Futuros", R.drawable.anadir, Modifier.weight(1f)) { }
-        HomeButton("Novedades", R.drawable.novedoso, Modifier.weight(1f)) { }
+        HomeButton("Colección", R.drawable.libros, Modifier.weight(1f)) { navController.navigate(Routes.CollectionScreenRoute.route) }
+        HomeButton("Futuros", R.drawable.anadir, Modifier.weight(1f)) { navController.navigate(Routes.DesiredMangasScreenRoute.route) }
+        HomeButton("Novedades", R.drawable.novedoso, Modifier.weight(1f)) { navController.navigate(Routes.NewMangasScreenRoute.route) }
     }
 }
 
@@ -352,7 +380,11 @@ fun MangaSlider(
 
 @Composable
 fun MangaImage(manga: MangaModel, onClick: () -> Unit) {
-    val imageUrl = "http://10.0.2.2:8080${manga.imageUrl}"
+    val imageUrl = if (manga.imageUrl.startsWith("https")) {
+        manga.imageUrl
+    } else {
+        "http://10.0.2.2:8080${manga.imageUrl}"
+    }
 
     Log.d("Image URL", "URL: $imageUrl")
 

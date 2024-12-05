@@ -136,6 +136,19 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
         }
     }
 
+    suspend fun isMangaInDesiredCollection(mangaId: Long): Boolean {
+        return mangaApi.checkIfMangaInDesiredCollection(mangaId)
+    }
+
+    suspend fun addDesiredMangaToUser(mangaId: Long): Response<String> {
+        return try {
+            val response = mangaApi.addDesiredMangaToUser(mangaId)
+            response
+        } catch (e: Exception) {
+            Response.success("ERROR")
+        }
+    }
+
 
     sealed class ReviewState {
         object Loading : ReviewState()

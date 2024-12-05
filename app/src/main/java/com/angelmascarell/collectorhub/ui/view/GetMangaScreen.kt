@@ -162,8 +162,8 @@ fun MangaImage(imageUrl: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            //.background(MaterialTheme.colorScheme.surface)
-            //.shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
+        //.background(MaterialTheme.colorScheme.surface)
+        //.shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
     ) {
         Image(
             painter = rememberAsyncImagePainter(imageUrl),
@@ -280,11 +280,13 @@ fun ActionButtons(mangaId: Long) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isInCollection by remember { mutableStateOf(false) }
+    var isInDesiredCollection by remember { mutableStateOf(false) }
     var reviewText by remember { mutableStateOf("") }
     var initialized by remember { mutableStateOf(false) }
 
     LaunchedEffect(mangaId) {
         isInCollection = viewModel.isMangaInCollection(mangaId)
+        isInDesiredCollection = viewModel.isMangaInDesiredCollection(mangaId)
         initialized = true
     }
 
@@ -331,10 +333,34 @@ fun ActionButtons(mangaId: Long) {
             }
 
             Button(
-                onClick = { /* Lógica para "Lo quiero" */ },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text(text = "Lo quiero", color = MaterialTheme.colorScheme.onSecondary)
+                onClick = {
+                    scope.launch {
+                        if (!isInCollection  || !isInDesiredCollection) {
+                            val response = viewModel.addDesiredMangaToUser(mangaId)
+                            if (response.isSuccessful) {
+                                Toast.makeText(
+                                    context,
+                                    "Manga añadido a la lista de deseados con éxito",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                isInDesiredCollection = true
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Error. El manga ya está presente",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isInDesiredCollection) Color.Magenta else MaterialTheme.colorScheme.secondary
+                )            ) {
+                Text(
+                    text = if (isInDesiredCollection) "✓ Deseado" else "Lo quiero",
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
             }
         }
 
@@ -478,8 +504,6 @@ fun RateAndCommentSection(
         }
     }
 }
-
-
 
 
 @Composable

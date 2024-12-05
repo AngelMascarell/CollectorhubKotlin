@@ -26,7 +26,10 @@ interface MangaApiService {
     suspend fun getCompletedMangas(): ObtainMangaResponse
 
     @GET("manga/{id}")
-    suspend fun getOneManga(@Path("id") id : Long) : MangaModel
+    suspend fun getOneManga(@Path("id") id: Long): MangaModel
+
+    @GET("manga/recent-30-days")
+    suspend fun getNewMangas(): Response<MangaResponseList>
 
     @GET("rate/manga/{mangaId}/average")
     suspend fun getAverageRateByMangaId(@Path("mangaId") mangaId: Long): Int
@@ -39,6 +42,15 @@ interface MangaApiService {
 
     @GET("user/mangas")
     suspend fun getUserMangas(): Response<MangaResponseList>
+
+    @GET("user/get-authenticated-user")
+    suspend fun getAuthenticatedUser(): UserModel
+
+    @POST("user/add-desired-manga/{mangaId}")
+    suspend fun addDesiredMangaToUser(@Path("mangaId") mangaId: Long): Response<String>
+
+    @GET("user/desired-mangas")
+    suspend fun getUserDesiredMangas(): Response<MangaResponseList>
 
     @POST("rate/new")
     suspend fun addMangaReview(@Body rateModel: RateCreateModel): Response<RateModel>

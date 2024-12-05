@@ -7,6 +7,8 @@ sealed class Routes(val route: String) {
     object ErrorScreenRoute : Routes("ErrorScreen")
     object CollectionScreenRoute : Routes("CollectionScreen")
     object ProfileScreenRoute : Routes("ProfileScreen")
+    object DesiredMangasScreenRoute : Routes("DesiredMangasScreen")
+    object NewMangasScreenRoute : Routes("NewMangasScreen")
     object GetMangaScreenRoute : Routes("GetMangaScreen/{mangaId}")
 
 

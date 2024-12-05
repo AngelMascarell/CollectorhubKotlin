@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.angelmascarell.collectorhub.data.local.TokenManager
 import com.angelmascarell.collectorhub.data.model.MangaModel
 import com.angelmascarell.collectorhub.data.model.ObtainMangaResponse
+import com.angelmascarell.collectorhub.data.model.UserModel
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,6 @@ class HomeViewModel @Inject constructor(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    // Estado para manejar la lista de mangas y el estado de la UI
     private val _mangas = mutableStateOf<List<MangaModel>>(emptyList())
     val mangas: State<List<MangaModel>> = _mangas
 
@@ -48,17 +48,29 @@ class HomeViewModel @Inject constructor(
         _mangaId.value = id
     }
 
+    private val _authenticatedUser = MutableLiveData<UserModel>()
+    val authenticatedUser: LiveData<UserModel> get() = _authenticatedUser
+
+    fun fetchAuthenticatedUser() {
+        viewModelScope.launch {
+            try {
+                val user = mangaRepository.getAuthenticatedUser()
+                _authenticatedUser.postValue(user)
+            } catch (e: Exception) {
+                Log.e("YourViewModel", "Error al obtener el usuario autenticado", e)
+            }
+        }
+    }
+
     fun loadPersonalizedMangas() {
         _isLoading.value = true
         _errorMessage.value = null
 
         viewModelScope.launch {
             try {
-                // Obtener mangas personalizados desde el repositorio
                 val mangas = mangaRepository.getPersonalizedMangas()
                 _personalizedMangas.value = mangas
             } catch (e: Exception) {
-                // Manejar error
                 Log.e("MangaViewModel", "Error loading personalized mangas", e)
                 _errorMessage.value = "Error al cargar los mangas personalizados"
             } finally {
@@ -67,14 +79,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // Función para cargar los mangas
     fun loadMangas() {
         _isLoading.value = true
         _errorMessage.value = null
 
         viewModelScope.launch {
             try {
-                // Verificar el token antes de hacer la petición
                 val token = tokenManager.getToken()
                 if (token.isEmpty()) {
                     _errorMessage.value = "Token no disponible"
@@ -93,6 +103,8 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+
 
 
 }
