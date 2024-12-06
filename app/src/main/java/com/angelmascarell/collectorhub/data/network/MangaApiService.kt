@@ -6,11 +6,13 @@ import com.angelmascarell.collectorhub.data.model.ObtainMangaResponse
 import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
+import com.angelmascarell.collectorhub.data.model.UpdateUserResponse
 import com.angelmascarell.collectorhub.data.model.UserModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -63,5 +65,10 @@ interface MangaApiService {
 
     @GET("user/getUserProfile")
     suspend fun searchUserById(): UserModel
+
+    @PUT("user/upd-auth-user")
+    suspend fun updateUser(@Body userModel: UserModel): UpdateUserResponse
+
+
 
 }

@@ -10,4 +10,7 @@ interface HomeClient {
 
     @POST("auth/login")
     suspend fun doSignIn(@Body requestBody: HomeRequest): Response<TokenModel>
+
+    @POST("auth/logout")
+    suspend fun doLogOut(): Response<String>
 }

@@ -39,4 +39,11 @@ class TokenManager @Inject constructor(
         }
     }
 
+    suspend fun clearToken() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(stringPreferencesKey("accessToken"))
+            Log.d("TokenManager", "Token eliminado")
+        }
+    }
+
 }

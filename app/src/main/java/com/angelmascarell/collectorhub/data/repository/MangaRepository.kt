@@ -8,8 +8,10 @@ import com.angelmascarell.collectorhub.data.model.MangaResponseList
 import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
+import com.angelmascarell.collectorhub.data.model.UpdateUserResponse
 import com.angelmascarell.collectorhub.data.model.UserModel
 import com.angelmascarell.collectorhub.data.network.MangaApiService
+import com.angelmascarell.collectorhub.viewmodel.GetMangaViewModel
 import kotlinx.coroutines.flow.first
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
@@ -168,6 +170,10 @@ class MangaRepository(
 
     suspend fun getAuthenticatedUser(): UserModel {
         return apiService.getAuthenticatedUser()
+    }
+
+    suspend fun updateAuthenticatedUser(userModel: UserModel): UpdateUserResponse {
+        return apiService.updateUser(userModel)
     }
 
 

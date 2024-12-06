@@ -64,9 +64,40 @@ fun MyBasicTextFieldReadOnly(
     )
 }
 
+@Composable
+fun MyEditableTextField(
+    value: String,
+    placeholder: String = "",
+    label: String = "",
+    readOnly: Boolean = false,
+    onTextChanged: (String) -> Unit,
+    imageVector: ImageVector,
+    password: Boolean = false,
+) {
+    OutlinedTextField(
+        value = value,
+        placeholder = { Text(text = placeholder) },
+        label = { Text(text = label) },
+        onValueChange = { newValue ->
+            if (!readOnly) {
+                onTextChanged(newValue)
+            }
+        },
+        colors = getOutlinedTextFieldDefaultsColors(),
+        maxLines = 1,
+        singleLine = true,
+        readOnly = readOnly,
+        leadingIcon = {
+            Icon(imageVector = imageVector, contentDescription = label)
+        },
+        visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None
+    )
+}
+
+
 
 @Composable
-fun getOutlinedTextFieldDefaultsColors(): TextFieldColors{
+fun getOutlinedTextFieldDefaultsColors(): TextFieldColors {
     return OutlinedTextFieldDefaults.colors().copy(
         focusedTextColor = Color.Black,
         focusedLabelColor = MyUltraBlue,

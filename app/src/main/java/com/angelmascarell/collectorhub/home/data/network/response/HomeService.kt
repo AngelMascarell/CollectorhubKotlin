@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.angelmascarell.collectorhub.home.data.network.request.HomeRequest
 import com.angelmascarell.collectorhub.core.routes.Routes
+import com.angelmascarell.collectorhub.data.local.TokenManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 class HomeService @Inject constructor(
     private val api: HomeClient,
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val tokenManager: TokenManager
 ) {
     // Modificar el método para recibir username y password como parámetros
     suspend fun doSignIn(username: String, password: String): String {
@@ -29,7 +31,10 @@ class HomeService @Inject constructor(
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null) {
-                        saveTokensToDataStore(loginResponse.accessToken, loginResponse.userId)  // Guardamos también el userId
+                        saveTokensToDataStore(
+                            loginResponse.accessToken,
+                            loginResponse.userId
+                        )  // Guardamos también el userId
                         return@withContext Routes.HomeScreenRoute.route // Ruta deseada para usuarios autenticados
                     } else {
                         Log.e("doSignIn", "LoginModel is null")
@@ -42,6 +47,11 @@ class HomeService @Inject constructor(
             }
             Routes.SignInScreenRoute.route // Ruta de inicio de sesión predeterminada en caso de error
         }
+    }
+
+    suspend fun logout() {
+        api.doLogOut()
+        tokenManager.clearToken()
     }
 
     private suspend fun saveTokensToDataStore(accessToken: String, userId: Long) {
