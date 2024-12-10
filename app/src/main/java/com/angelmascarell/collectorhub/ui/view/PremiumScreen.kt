@@ -67,22 +67,11 @@ fun PremiumScreen() {
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Box(
                 modifier = Modifier.fillMaxSize()
-            ) {
-                // Imagen en la parte inferior
-                /*Image(
-                    painter = painterResource(id = R.drawable.fondolibros),
-                    contentDescription = "Fondo de pantalla",
-                    modifier = Modifier
-                        .fillMaxWidth() // O puedes usar .size(200.dp) si prefieres tamaño fijo
-                        .height(200.dp) // Ajusta la altura según lo que necesites
-                        .alpha(0.6f)
-                        .align(Alignment.BottomCenter) // Posiciona la imagen en la parte inferior
-                )
-                 */
-            }
+            )
 
             Column(
                 modifier = Modifier
@@ -159,8 +148,8 @@ fun AdvantagesList() {
                 width = 2.dp,
                 brush = Brush.linearGradient(
                     listOf(
-                        Color(0xFFD6A6F1),
-                        Color(0xFFF2D4FF)
+                        Color(0xFF17AAF0),
+                        Color(0xFFf5fafe)
                     )
                 ),
                 shape = RoundedCornerShape(8.dp)

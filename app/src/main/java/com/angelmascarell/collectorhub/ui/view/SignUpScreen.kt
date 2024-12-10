@@ -58,7 +58,8 @@ fun SignUpScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MySoftBlue)
+            //.background(MySoftBlue)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -83,7 +84,8 @@ fun Header() {
     ) {
         Text(
             text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold,             color = MaterialTheme.colorScheme.onBackground
+                )) {
                     append("Create ")
                 }
                 withStyle(
@@ -226,7 +228,7 @@ fun Footer(navController: NavController) {
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )

@@ -45,6 +45,7 @@ import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.core.composable.MyBasicTextField
 import com.angelmascarell.collectorhub.home.presentation.HomeViewModel
+import com.angelmascarell.collectorhub.ui.theme.MySoftBlue
 
 
 @Composable
@@ -55,7 +56,6 @@ fun SignInScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            //.background(MySoftBlue)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -80,7 +80,11 @@ fun Header() {
     ) {
         Text(
             text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground
+                    )
+                ) {
                     append("Welcome ")
                 }
                 withStyle(
@@ -193,7 +197,7 @@ fun Footer(navController: NavController) {
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )

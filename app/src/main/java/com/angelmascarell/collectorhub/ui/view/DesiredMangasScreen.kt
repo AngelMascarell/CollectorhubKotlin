@@ -26,6 +26,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +61,7 @@ fun DesiredMangasScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         CloseButton(navController)
@@ -68,15 +70,17 @@ fun DesiredMangasScreen() {
 
         Text(
             text = "Resumen de tu lista de deseados",
-            style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        )
+            style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onBackground
+            )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Tus deseados: ",
-            style = TextStyle(fontSize = 20.sp)
-        )
+            style = TextStyle(fontSize = 20.sp),
+            color = MaterialTheme.colorScheme.onBackground
+            )
         Spacer(modifier = Modifier.height(16.dp))
         DesiredMangaGrid(
             mangaList = userCollection,
@@ -137,7 +141,7 @@ fun DesiredMangaItem(manga: MangaModel, onClick: () -> Unit, averageRating: Int)
         Text(
             text = manga.title,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
@@ -150,7 +154,6 @@ fun DesiredMangaItem(manga: MangaModel, onClick: () -> Unit, averageRating: Int)
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Icono de estrella
                 Image(
                     painter = rememberAsyncImagePainter(R.drawable.ic_star),
                     contentDescription = "Star Icon",
@@ -162,7 +165,7 @@ fun DesiredMangaItem(manga: MangaModel, onClick: () -> Unit, averageRating: Int)
                 Text(
                     text = "%.1f".format(averageRating),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.Yellow,
                     textAlign = TextAlign.Center
                 )
             }

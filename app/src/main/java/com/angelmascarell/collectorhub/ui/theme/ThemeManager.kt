@@ -13,13 +13,11 @@ class ThemeManager @Inject constructor(
 ) {
     private val THEME_KEY = booleanPreferencesKey("dark_theme")
 
-    // Leer el tema desde el DataStore
     val isDarkTheme: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            preferences[THEME_KEY] ?: false // Predeterminado en modo claro
+            preferences[THEME_KEY] ?: false
         }
 
-    // Guardar la preferencia del tema
     suspend fun setDarkTheme(isDark: Boolean) {
         dataStore.edit { preferences ->
             preferences[THEME_KEY] = isDark

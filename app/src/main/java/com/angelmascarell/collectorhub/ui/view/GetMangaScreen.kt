@@ -2,6 +2,9 @@ package com.angelmascarell.collectorhub.ui.view
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,15 +19,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,11 +53,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -81,29 +93,57 @@ fun GetMangaScreen() {
         }
     }
 
-    when (val currentState = state.value) {
-        is GetMangaViewModel.MangaDetailState.Loading -> {
-            CircularProgressIndicator(modifier = Modifier.fillMaxSize())
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        when (val currentState = state.value) {
+            is GetMangaViewModel.MangaDetailState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
 
-        is GetMangaViewModel.MangaDetailState.Success -> {
-            MangaDetailView(
-                mangaDetail = currentState.mangaDetail,
-                navController = navController,
-                averageRate = averageRate,
-                rates = rates
-            )
-        }
+            is GetMangaViewModel.MangaDetailState.Success -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item {
+                        MangaDetailView(
+                            mangaDetail = currentState.mangaDetail,
+                            navController = navController,
+                            averageRate = averageRate,
+                            rates = rates
+                        )
+                    }
 
-        is GetMangaViewModel.MangaDetailState.Error -> {
-            Text(
-                text = "Error: ${currentState.message}",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(16.dp)
-            )
+                    item {
+                        Text(
+                            text = "Valoraciones",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+
+                    items(rates) { rate ->
+                        RateItem(rate = rate)
+                    }
+                }
+            }
+
+            is GetMangaViewModel.MangaDetailState.Error -> {
+                Text(
+                    text = "Error: ${currentState.message}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun MangaDetailView(
@@ -153,7 +193,7 @@ fun MangaDetailView(
         Spacer(modifier = Modifier.height(12.dp))
         ActionButtons(mangaId = mangaDetail.id)
         Spacer(modifier = Modifier.height(12.dp))
-        MangaRatings(rates = rates)
+        //MangaRatings(rates = rates)
     }
 }
 
@@ -181,7 +221,7 @@ fun MangaTitle(title: String) {
         text = title,
         style = MaterialTheme.typography.titleLarge.copy(
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.onBackground,
         ),
         modifier = Modifier.fillMaxWidth()
     )
@@ -205,7 +245,7 @@ fun MangaAuthorAndReleaseDate(author: String, releaseDate: LocalDate) {
         Text(
             text = author,
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onBackground,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -283,6 +323,11 @@ fun ActionButtons(mangaId: Long) {
     var isInDesiredCollection by remember { mutableStateOf(false) }
     var reviewText by remember { mutableStateOf("") }
     var initialized by remember { mutableStateOf(false) }
+    var showAchievementDialog by remember { mutableStateOf(false) }
+    var achievementMessage by remember { mutableStateOf("") }
+
+    val myCustomBlue = Color(0xFF4A7499)
+    val myCustomBlueSecondary = Color(0xFF468D99)
 
     LaunchedEffect(mangaId) {
         isInCollection = viewModel.isMangaInCollection(mangaId)
@@ -312,6 +357,18 @@ fun ActionButtons(mangaId: Long) {
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 isInCollection = true
+
+                                if (isInDesiredCollection) {
+                                    isInDesiredCollection = false
+                                }
+
+                                val responseTask = viewModel.checkTasks()
+                                if (responseTask.isSuccessful && responseTask.body()
+                                        ?.startsWith("Gamificación conseguida:") == true
+                                ) {
+                                    achievementMessage = responseTask.body() ?: ""
+                                    showAchievementDialog = true
+                                }
                             } else {
                                 Toast.makeText(
                                     context,
@@ -323,19 +380,19 @@ fun ActionButtons(mangaId: Long) {
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isInCollection) Color.Green else MaterialTheme.colorScheme.primary
+                    containerColor = if (isInCollection) myCustomBlue else MaterialTheme.colorScheme.primary
                 )
             ) {
                 Text(
                     text = if (isInCollection) "✓ Añadido" else "Lo tengo",
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = Color.White
                 )
             }
 
             Button(
                 onClick = {
                     scope.launch {
-                        if (!isInCollection  || !isInDesiredCollection) {
+                        if (!isInCollection || !isInDesiredCollection) {
                             val response = viewModel.addDesiredMangaToUser(mangaId)
                             if (response.isSuccessful) {
                                 Toast.makeText(
@@ -355,11 +412,12 @@ fun ActionButtons(mangaId: Long) {
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isInDesiredCollection) Color.Magenta else MaterialTheme.colorScheme.secondary
-                )            ) {
+                    containerColor = if (isInDesiredCollection) Color.Magenta else myCustomBlueSecondary
+                )
+            ) {
                 Text(
                     text = if (isInDesiredCollection) "✓ Deseado" else "Lo quiero",
-                    color = MaterialTheme.colorScheme.onSecondary
+                    color = Color.White
                 )
             }
         }
@@ -380,7 +438,74 @@ fun ActionButtons(mangaId: Long) {
             )
         }
     }
+
+    if (showAchievementDialog) {
+        AchievementDialogWithAnimation(
+            message = achievementMessage,
+            onDismiss = {
+                showAchievementDialog = false
+            }
+        )
+    }
 }
+
+
+@Composable
+fun AchievementDialogWithAnimation(message: String, onDismiss: () -> Unit) {
+    val scale = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        scale.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 500, easing = EaseOutBack)
+        )
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .background(Color.Black.copy(alpha = 0.7f))
+                .padding(16.dp)
+                .fillMaxWidth(0.8f),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(8.dp),
+                modifier = Modifier
+                    .graphicsLayer(scaleX = scale.value, scaleY = scale.value)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "¡Logro Desbloqueado!",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4CAF50),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(text = "Cerrar")
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun RateAndCommentSection(
@@ -422,7 +547,8 @@ fun RateAndCommentSection(
             Text(
                 text = "Califica este manga",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Row(
@@ -538,7 +664,7 @@ fun RateItem(rate: RateModel) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         ) {
             val maxStars = 5
             for (i in 1..maxStars) {
@@ -551,19 +677,20 @@ fun RateItem(rate: RateModel) {
                     imageVector = icon,
                     contentDescription = "Star rating",
                     tint = if (i <= rate.rate) Color(0xFFFFD700) else Color.Gray,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier
+                        .size(24.dp)
                 )
             }
             Text(
                 text = " (${rate.rate}/5)",
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp, top = 5.dp)
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 8.dp, top = 8.dp)
             )
             Text(
                 text = rate.date.toString(),
                 style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
-                modifier = Modifier.padding(start = 8.dp, top = 5.dp)
+                modifier = Modifier.padding(start = 12.dp, top = 6.dp)
             )
         }
 
@@ -571,11 +698,7 @@ fun RateItem(rate: RateModel) {
             text = rate.comment,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(5.dp)
+            modifier = Modifier.padding(8.dp)
         )
     }
 }
-
-
-
-

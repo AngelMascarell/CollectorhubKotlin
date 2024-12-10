@@ -74,10 +74,8 @@ fun ProfileScreen() {
     var isEditing by remember { mutableStateOf(false) }
     var editableProfile by remember { mutableStateOf(userProfile) }
 
-    // Update editableProfile whenever userProfile changes
     LaunchedEffect(userProfile) {
         editableProfile = userProfile
-        println("User profile loaded: $userProfile")
     }
 
     LaunchedEffect(Unit) {
@@ -97,7 +95,12 @@ fun ProfileScreen() {
 
 
     Scaffold {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             CloseButton(navController)
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -121,8 +124,7 @@ fun ProfileScreen() {
                                     viewModel.updateUserProfile(updatedProfile)
                                     isEditing = false
                                 }
-                            }
-                            ,
+                            },
                             onCancelClick = {
                                 editableProfile = userProfile
                                 isEditing = false
@@ -136,14 +138,13 @@ fun ProfileScreen() {
 
                                     else -> editableProfile
                                 }
-                            }
-
-                            ,
+                            },
                             navController = navController,
                             viewModel = viewModel
                         )
                     }
                 }
+
                 else -> Text(
                     text = "No hay datos disponibles.",
                     modifier = Modifier
@@ -249,7 +250,6 @@ fun ProfileContent(
 }
 
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PersonalInfoSection(
@@ -295,14 +295,12 @@ fun PersonalInfoSection(
 }
 
 
-
-
 @Composable
 fun AccountStatusSection(isPremium: Boolean) {
     Text(
         text = if (isPremium) "Cuenta Premium Activa" else "Cuenta Estándar",
         style = MaterialTheme.typography.bodyLarge,
-        color = if (isPremium) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+        color = Color.Black,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
     )
@@ -349,8 +347,10 @@ fun ActionButtonsSection(
             }
 
             Button(
-                onClick = { logout()
-                    navigateToSignIn() },
+                onClick = {
+                    logout()
+                    navigateToSignIn()
+                },
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)

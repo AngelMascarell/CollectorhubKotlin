@@ -8,6 +8,7 @@ import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
 import com.angelmascarell.collectorhub.data.model.UpdateUserResponse
 import com.angelmascarell.collectorhub.data.model.UserModel
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -69,6 +70,8 @@ interface MangaApiService {
     @PUT("user/upd-auth-user")
     suspend fun updateUser(@Body userModel: UserModel): UpdateUserResponse
 
+    @POST("/task/checkCompletion")
+    suspend fun checkTasks() : Response<ResponseBody>
 
 
 }

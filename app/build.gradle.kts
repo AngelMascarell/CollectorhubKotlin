@@ -57,6 +57,9 @@ dependencies {
 
     implementation("androidx.compose.ui:ui:1.4.0") // O la versión que estés usando
 
+    implementation ("androidx.compose.animation:animation:1.4.0") // Animaciones
+
+
 
     implementation("com.google.accompanist:accompanist-pager:0.28.0") // versión más reciente
     implementation("io.coil-kt:coil-compose:2.2.0")

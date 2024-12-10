@@ -48,19 +48,24 @@ class HomeViewModel @Inject constructor(
         _mangaId.value = id
     }
 
-    private val _authenticatedUser = MutableLiveData<UserModel>()
-    val authenticatedUser: LiveData<UserModel> get() = _authenticatedUser
+    //private val _authenticatedUser = MutableLiveData<UserModel>()
+    //val authenticatedUser: LiveData<UserModel> get() = _authenticatedUser
+
+    private val _userImageUrl = MutableLiveData<String?>()
+    val userImageUrl: LiveData<String?> get() = _userImageUrl
+
 
     fun fetchAuthenticatedUser() {
         viewModelScope.launch {
             try {
-                val user = mangaRepository.getAuthenticatedUser()
-                _authenticatedUser.postValue(user)
+                val imageUrl = mangaRepository.getAuthenticatedUser()
+                _userImageUrl.postValue(imageUrl)
             } catch (e: Exception) {
-                Log.e("YourViewModel", "Error al obtener el usuario autenticado", e)
+                Log.e("YourViewModel", "Error al obtener la URL de la imagen del usuario", e)
             }
         }
     }
+
 
     fun loadPersonalizedMangas() {
         _isLoading.value = true
@@ -103,8 +108,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
-
 
 
 }

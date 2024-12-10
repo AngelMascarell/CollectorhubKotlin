@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -76,20 +77,18 @@ fun HomeScreen() {
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
 
-    MaterialTheme(
-        colorScheme = if (isDarkTheme) customDarkColorScheme() else customLightColorScheme()
-    ) {
+    AppTheme(isDarkTheme = isDarkTheme) {
         val homeViewModel: HomeViewModel = hiltViewModel()
         val mangaViewModel: GetMangaViewModel = hiltViewModel()
 
         var searchQuery by remember { mutableStateOf("") }
         val mangas = homeViewModel.mangas.value
         val personalizedMangas = homeViewModel.personalizedMangas.value
-        val user = homeViewModel.authenticatedUser.value
+        val userImageUrl by homeViewModel.userImageUrl.observeAsState()
         val isLoading = homeViewModel.isLoading.value
         val errorMessage = homeViewModel.errorMessage.value
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(homeViewModel) {
             homeViewModel.loadPersonalizedMangas()
             homeViewModel.loadMangas()
             homeViewModel.fetchAuthenticatedUser()
@@ -99,7 +98,7 @@ fun HomeScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .background(if (isDarkTheme) Color(0xFF121212) else Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp)
                 .padding(bottom = 80.dp)
         ) {
@@ -116,7 +115,7 @@ fun HomeScreen() {
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isDarkTheme) Color(0xFF444444) else Color(0xFFFFA500)
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Image(
@@ -126,9 +125,9 @@ fun HomeScreen() {
                     )
                 }
 
-                if (user != null) {
-                    HeaderRow(navController, userImageUrl = user.profileImageUrl)
-                }
+
+                HeaderRow(navController, userImageUrl = userImageUrl)
+
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -159,13 +158,18 @@ fun HomeScreen() {
             Text(
                 text = "Mangas personalizados",
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!isLoading && personalizedMangas.isNotEmpty()) {
-                MangaSlider(mangas = personalizedMangas, navController = navController, mangaViewModel = homeViewModel)
+                MangaSlider(
+                    mangas = personalizedMangas,
+                    navController = navController,
+                    mangaViewModel = homeViewModel
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -179,13 +183,18 @@ fun HomeScreen() {
             Text(
                 text = "Mangas generales",
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!isLoading && mangas.isNotEmpty()) {
-                MangaSlider(mangas = mangas, navController = navController, mangaViewModel = homeViewModel)
+                MangaSlider(
+                    mangas = mangas,
+                    navController = navController,
+                    mangaViewModel = homeViewModel
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -195,10 +204,17 @@ fun HomeScreen() {
     }
 }
 
+@Composable
+fun AppTheme(isDarkTheme: Boolean, content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = if (isDarkTheme) customDarkColorScheme() else customLightColorScheme(),
+        content = content
+    )
+}
+
 
 @Composable
 fun HeaderRow(navController: NavHostController, userImageUrl: String?) {
-    val url = "http://10.0.2.2:8080${userImageUrl}"
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -206,36 +222,38 @@ fun HeaderRow(navController: NavHostController, userImageUrl: String?) {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "CollectorHub",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        IconButton(onClick = { navController.navigate(Routes.ProfileScreenRoute.route) }) {
-            if (!userImageUrl.isNullOrEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = url,
-                        placeholder = painterResource(id = R.drawable.profile),
-                        error = painterResource(id = R.drawable.libros)
-                    ),
-                    contentDescription = "Perfil",
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.background),
-                    contentScale = ContentScale.Crop
-                )
+        HeaderTitle()
+        ProfileImage(navController = navController, userImageUrl = userImageUrl)
+    }
+}
 
-            } else {
-                Icon(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Perfil",
-                    modifier = Modifier.size(28.dp),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        }
+@Composable
+fun HeaderTitle() {
+    Text(
+        text = "CollectorHub",
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+    )
+}
+
+@Composable
+fun ProfileImage(navController: NavHostController, userImageUrl: String?) {
+    val url = "http://10.0.2.2:8080${userImageUrl}"
+
+    IconButton(onClick = { navController.navigate(Routes.ProfileScreenRoute.route) }) {
+        Image(
+            painter = rememberAsyncImagePainter(
+                model = url,
+                placeholder = painterResource(id = R.drawable.profile),
+                error = painterResource(id = R.drawable.libros)
+            ),
+            contentDescription = "Perfil",
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background),
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
@@ -248,9 +266,21 @@ fun FirstRowButtons(navController: NavHostController) {
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        HomeButton("Colección", R.drawable.libros, Modifier.weight(1f)) { navController.navigate(Routes.CollectionScreenRoute.route) }
-        HomeButton("Futuros", R.drawable.anadir, Modifier.weight(1f)) { navController.navigate(Routes.DesiredMangasScreenRoute.route) }
-        HomeButton("Novedades", R.drawable.novedoso, Modifier.weight(1f)) { navController.navigate(Routes.NewMangasScreenRoute.route) }
+        HomeButton("Colección", R.drawable.libros, Modifier.weight(1f)) {
+            navController.navigate(
+                Routes.CollectionScreenRoute.route
+            )
+        }
+        HomeButton("Futuros", R.drawable.anadir, Modifier.weight(1f)) {
+            navController.navigate(
+                Routes.DesiredMangasScreenRoute.route
+            )
+        }
+        HomeButton("Novedades", R.drawable.novedoso, Modifier.weight(1f)) {
+            navController.navigate(
+                Routes.NewMangasScreenRoute.route
+            )
+        }
     }
 }
 
@@ -448,7 +478,7 @@ fun PremiumAdBanner(onClick: () -> Unit) {
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6A0572)
+                    containerColor = Color(0xFF17AAF0)
                 ),
                 modifier = Modifier
                     .weight(1.2f)
@@ -504,35 +534,35 @@ fun AdBanner() {
     }
 }
 
-
 @Composable
 fun customDarkColorScheme(): ColorScheme {
     return darkColorScheme(
-        primary = Color(0xFFBB86FC),
+        primary = Color(0xFF17AAF0),
         onPrimary = Color.White,
-        secondary = Color(0xFF03DAC6),
+        secondary = Color(0xFFFFA726),
         onSecondary = Color.Black,
         background = Color(0xFF121212),
-        onBackground = Color.White,
-        surface = Color(0xFF121212),
+        onBackground = Color(0xFFE0E0E0),
+        surface = Color(0xFF1E1E1E),
         onSurface = Color.White,
         error = Color(0xFFCF6679),
-        onError = Color.Black,
+        onError = Color.Black
     )
 }
 
 @Composable
 fun customLightColorScheme(): ColorScheme {
     return lightColorScheme(
-        primary = Color(0xFF6200EE),
+        primary = Color(0xFF17AAF0),
         onPrimary = Color.White,
-        secondary = Color(0xFF03DAC6),
+        secondary = Color(0xFFFFA726),
         onSecondary = Color.Black,
-        background = Color.White,
+        background = Color(0xFFFFFFFF),
         onBackground = Color.Black,
-        surface = Color(0xFFFFFFFF),
+        surface = Color(0xFFF5F5F5),
         onSurface = Color.Black,
         error = Color(0xFFB00020),
-        onError = Color.White,
+        onError = Color.White
     )
 }
+

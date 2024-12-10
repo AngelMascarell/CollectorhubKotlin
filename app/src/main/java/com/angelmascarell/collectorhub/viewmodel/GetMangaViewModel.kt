@@ -17,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -26,6 +27,28 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
 
     private val _state = MutableStateFlow<MangaDetailState>(MangaDetailState.Loading)
     val state: StateFlow<MangaDetailState> get() = _state
+
+    private var resultMessage: String? = null
+        private set
+
+    private var isLoading: Boolean = false
+        private set
+
+    private var errorMessage: String? = null
+        private set
+
+    suspend fun checkTasks(): Response<String> {
+        isLoading = true
+        return try {
+            val response = mangaApi.checkTaskCompletion()
+            isLoading = false
+            response
+        } catch (e: Exception) {
+            isLoading = false
+            Response.error(500, "Error al realizar la llamada".toResponseBody())
+        }
+    }
+
 
     fun fetchMangaDetails(mangaId: Long) {
         _state.value = MangaDetailState.Loading

@@ -168,12 +168,29 @@ class MangaRepository(
         }
     }
 
-    suspend fun getAuthenticatedUser(): UserModel {
-        return apiService.getAuthenticatedUser()
+    suspend fun getAuthenticatedUser(): String? {
+        val user = apiService.getAuthenticatedUser()
+        return user.profileImageUrl
+
     }
 
     suspend fun updateAuthenticatedUser(userModel: UserModel): UpdateUserResponse {
         return apiService.updateUser(userModel)
+    }
+
+    suspend fun checkTaskCompletion(): Response<String> {
+        return try {
+            val response = apiService.checkTasks()
+            if (response.isSuccessful) {
+                val responseBody = response.body()?.string() ?: "Respuesta vacía"
+                Response.success(responseBody)
+            } else {
+                val errorMessage = response.errorBody()?.string() ?: "Error desconocido"
+                Response.error(response.code(), errorMessage.toResponseBody())
+            }
+        } catch (e: Exception) {
+            Response.error(500, "Excepción: ${e.localizedMessage}".toResponseBody())
+        }
     }
 
 

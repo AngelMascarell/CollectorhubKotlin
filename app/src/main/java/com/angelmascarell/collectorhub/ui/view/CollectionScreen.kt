@@ -74,6 +74,7 @@ fun CollectionScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
 
@@ -94,14 +95,12 @@ fun CollectionScreen() {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             InfoCard(
-                title = "Total de Mangas",
-                value = totalMangas.toString(),
-                icon = R.drawable.libros
-            )
-            InfoCard(
                 title = "Total de Géneros",
                 value = genresCount.size.toString(),
-                icon = R.drawable.heart
+            )
+            InfoCard(
+                title = "Total de Mangas",
+                value = totalMangas.toString(),
             )
         }
 
@@ -133,35 +132,29 @@ fun CollectionScreen() {
 
 
 @Composable
-fun InfoCard(title: String, value: String, icon: Int) {
+fun InfoCard(title: String, value: String) {
+
     Card(
         modifier = Modifier
-            .width(140.dp)
+            .width(120.dp)
             .padding(8.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = Color.White
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White),
+                textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineSmall.copy(color = Color.White),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodySmall.copy(color = Color.White),
+                style = MaterialTheme.typography.titleLarge.copy(color = Color.White),
                 textAlign = TextAlign.Center
             )
         }
