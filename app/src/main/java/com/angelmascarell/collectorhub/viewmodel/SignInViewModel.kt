@@ -1,4 +1,4 @@
-package com.angelmascarell.collectorhub.signin.presentation
+package com.angelmascarell.collectorhub.viewmodel
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -8,16 +8,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.angelmascarell.collectorhub.home.data.network.request.HomeRequest
+import com.angelmascarell.collectorhub.data.request.HomeRequest
 import com.angelmascarell.collectorhub.core.routes.Routes
-import com.angelmascarell.collectorhub.home.data.network.response.HomeService
+import com.angelmascarell.collectorhub.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    var loginService: HomeService,
+    private var loginService: AuthRepository,
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 
@@ -30,7 +30,7 @@ class SignInViewModel @Inject constructor(
     private val _isLogin = MutableLiveData<Boolean>(false)
     val isLogin: LiveData<Boolean> = _isLogin
 
-    private val _redirectRoute = MutableLiveData<String>() // Para manejar la ruta de redirección
+    private val _redirectRoute = MutableLiveData<String>()
     val redirectRoute: LiveData<String> = _redirectRoute
 
     fun login(callback: (Boolean) -> Unit) {
@@ -38,39 +38,32 @@ class SignInViewModel @Inject constructor(
         val usernameValue = username.value.orEmpty()
         val passwordValue = password.value.orEmpty()
 
-        // Verifica si el nombre de usuario y la contraseña no están vacíos
         if (usernameValue.isBlank() || passwordValue.isBlank()) {
             callback.invoke(_isLogin.value!!)
             return
         }
 
-        // Crear el LoginRequest con los valores de usuario y contraseña
         val loginRequest = HomeRequest(usernameValue, passwordValue)
 
         viewModelScope.launch {
             try {
-                // Usar el loginRequest en lugar del FormBody
                 val result = loginService.doSignIn(loginRequest.username, loginRequest.password)
 
-                // Verifica si la ruta devuelta es para la pantalla de inicio
                 if (result == Routes.HomeScreenRoute.route) {
-                    _isLogin.value = true // Inicio de sesión exitoso
+                    _isLogin.value = true
                 } else {
-                    _isLogin.value = false // Inicio de sesión fallido
+                    _isLogin.value = false
                 }
 
-                // Actualiza la ruta de redirección
                 _redirectRoute.value = result
                 callback.invoke(_isLogin.value!!)
             } catch (e: Exception) {
-                // Maneja excepciones si las hubiera
                 _isLogin.value = false
-                _redirectRoute.value = Routes.SignInScreenRoute.route // Ruta de inicio de sesión en caso de error
+                _redirectRoute.value = Routes.SignInScreenRoute.route
                 callback.invoke(_isLogin.value!!)
             }
         }
     }
-
 
     fun onSignInChanged(username: String, password: String) {
         _username.value = username

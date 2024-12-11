@@ -202,8 +202,6 @@ fun MangaImage(imageUrl: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-        //.background(MaterialTheme.colorScheme.surface)
-        //.shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
     ) {
         Image(
             painter = rememberAsyncImagePainter(imageUrl),

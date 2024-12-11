@@ -1,4 +1,4 @@
-package com.angelmascarell.collectorhub.signin.presentation
+package com.angelmascarell.collectorhub.ui.view
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -44,8 +44,7 @@ import com.angelmascarell.collectorhub.ui.theme.MyUltraBlue
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.core.composable.MyBasicTextField
-import com.angelmascarell.collectorhub.home.presentation.HomeViewModel
-import com.angelmascarell.collectorhub.ui.theme.MySoftBlue
+import com.angelmascarell.collectorhub.viewmodel.SignInViewModel
 
 
 @Composable
@@ -59,18 +58,18 @@ fun SignInScreen() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Header()
+        HeaderSignIn()
 
         Spacer(modifier = Modifier.height(40.dp))
-        Body(navController)
+        BodySignIn(navController)
 
         Spacer(modifier = Modifier.height(16.dp))
-        Footer(navController)
+        FooterSignIn(navController)
     }
 }
 
 @Composable
-fun Header() {
+fun HeaderSignIn() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -111,7 +110,7 @@ fun Header() {
 }
 
 @Composable
-fun Body(navController: NavController, signInViewModel: SignInViewModel = hiltViewModel()) {
+fun BodySignIn(navController: NavController, signInViewModel: SignInViewModel = hiltViewModel()) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -146,7 +145,7 @@ fun Body(navController: NavController, signInViewModel: SignInViewModel = hiltVi
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .clickable {
-                    navController.navigate(Routes.ForgotPasswordScreenRoute.route)
+                    navController.navigate(Routes.SignInScreenRoute.route)
                 },
             color = Color.Gray
         )
@@ -186,7 +185,7 @@ fun Body(navController: NavController, signInViewModel: SignInViewModel = hiltVi
 }
 
 @Composable
-fun Footer(navController: NavController) {
+fun FooterSignIn(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

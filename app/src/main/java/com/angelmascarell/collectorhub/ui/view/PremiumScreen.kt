@@ -44,8 +44,6 @@ import androidx.navigation.NavHostController
 import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
-import com.angelmascarell.collectorhub.home.presentation.customDarkColorScheme
-import com.angelmascarell.collectorhub.home.presentation.customLightColorScheme
 import com.angelmascarell.collectorhub.viewmodel.ThemeViewModel
 
 
@@ -82,10 +80,6 @@ fun PremiumScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                //Title()
-
-                //Spacer(modifier = Modifier.height(16.dp))
-
                 PremiumText()
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -96,7 +90,7 @@ fun PremiumScreen() {
 
                 PricingSection()
 
-                AdBanner()
+                AdBannerPremium()
             }
         }
     }
@@ -294,7 +288,7 @@ fun CloseButton(navController: NavHostController) {
 
 
 @Composable
-fun AdBanner() {
+fun AdBannerPremium() {
     Box(
         modifier = Modifier
             .fillMaxWidth()

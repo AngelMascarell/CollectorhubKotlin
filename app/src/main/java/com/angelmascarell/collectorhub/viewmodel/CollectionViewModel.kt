@@ -6,11 +6,12 @@ import androidx.lifecycle.ViewModel
 import com.angelmascarell.collectorhub.data.model.MangaModel
 import com.angelmascarell.collectorhub.data.model.MangaResponseList
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
+import com.angelmascarell.collectorhub.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class CollectionViewModel @Inject constructor(private val mangaRepository: MangaRepository) : ViewModel() {
+class CollectionViewModel @Inject constructor(private val mangaRepository: MangaRepository, private val userRepository: UserRepository) : ViewModel() {
 
     private val _userCollection = MutableLiveData<List<MangaModel>>()
     val userCollection: LiveData<List<MangaModel>> = _userCollection
@@ -40,7 +41,7 @@ class CollectionViewModel @Inject constructor(private val mangaRepository: Manga
 
     suspend fun loadUserCollection() {
         try {
-            val collection: MangaResponseList = mangaRepository.getUserMangas()
+            val collection: MangaResponseList = userRepository.getUserMangas()
             val mangaList = collection.mangaResponseList
 
             _userCollection.postValue(mangaList)

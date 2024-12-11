@@ -1,4 +1,4 @@
-package com.angelmascarell.collectorhub.home.presentation
+package com.angelmascarell.collectorhub.ui.view
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -58,7 +58,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -67,6 +66,7 @@ import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.data.model.MangaModel
+import com.angelmascarell.collectorhub.viewmodel.HomeViewModel
 import com.angelmascarell.collectorhub.viewmodel.GetMangaViewModel
 import com.angelmascarell.collectorhub.viewmodel.ThemeViewModel
 
@@ -156,7 +156,7 @@ fun HomeScreen() {
             }
 
             Text(
-                text = "Mangas personalizados",
+                text = "Según tus preferencias",
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 8.dp),
                 color = MaterialTheme.colorScheme.onBackground

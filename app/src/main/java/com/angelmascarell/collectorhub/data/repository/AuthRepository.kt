@@ -1,35 +1,39 @@
-package com.angelmascarell.collectorhub.signin.data.network.response
+package com.angelmascarell.collectorhub.data.repository
 
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.angelmascarell.collectorhub.home.data.network.request.HomeRequest
+import com.angelmascarell.collectorhub.data.request.HomeRequest
 import com.angelmascarell.collectorhub.core.routes.Routes
-import com.angelmascarell.collectorhub.home.data.network.response.HomeClient
+import com.angelmascarell.collectorhub.data.local.TokenManager
+import com.angelmascarell.collectorhub.data.network.AuthService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class LoginService @Inject constructor(
-    private val api: HomeClient,
-    private val dataStore: DataStore<Preferences>
+class AuthRepository @Inject constructor(
+    private val api: AuthService,
+    private val dataStore: DataStore<Preferences>,
+    private val tokenManager: TokenManager
 ) {
-    // Modificar el método para recibir username y password como parámetros
     suspend fun doSignIn(username: String, password: String): String {
         return withContext(Dispatchers.IO) {
             try {
-                // Crear el LoginRequest con los parámetros recibidos
                 val loginRequest = HomeRequest(username, password)
                 val response = api.doSignIn(loginRequest)
 
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null) {
-                        saveTokensToDataStore(loginResponse.accessToken)
+                        saveTokensToDataStore(
+                            loginResponse.accessToken,
+                            loginResponse.userId
+                        )
                         return@withContext Routes.HomeScreenRoute.route
                     } else {
                         Log.e("doSignIn", "LoginModel is null")
@@ -40,17 +44,22 @@ class LoginService @Inject constructor(
             } catch (e: TimeoutCancellationException) {
                 e.printStackTrace()
             }
-            Routes.SignInScreenRoute.route // Ruta de inicio de sesión predeterminada en caso de error
+            Routes.SignInScreenRoute.route
         }
     }
 
-    private suspend fun saveTokensToDataStore(accessToken: String) {
+    suspend fun logout() {
+        api.doLogOut()
+        tokenManager.clearToken()
+    }
+
+    private suspend fun saveTokensToDataStore(accessToken: String, userId: Long) {
         dataStore.edit { preferences ->
             preferences[stringPreferencesKey("accessToken")] = accessToken
+            preferences[longPreferencesKey("userId")] = userId
         }
-        // Verificar si el token fue guardado correctamente
         val savedToken = dataStore.data.first()[stringPreferencesKey("accessToken")]
-        Log.d("TokenManager", "Token guardado: $savedToken")
+        val savedUserId = dataStore.data.first()[longPreferencesKey("userId")]
+        Log.d("TokenManager", "Token guardado: $savedToken, userId guardado: $savedUserId")
     }
-
 }

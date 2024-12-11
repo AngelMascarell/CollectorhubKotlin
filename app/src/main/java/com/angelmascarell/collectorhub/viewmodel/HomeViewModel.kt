@@ -1,19 +1,16 @@
-package com.angelmascarell.collectorhub.home.presentation
+package com.angelmascarell.collectorhub.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.angelmascarell.collectorhub.data.local.TokenManager
 import com.angelmascarell.collectorhub.data.model.MangaModel
-import com.angelmascarell.collectorhub.data.model.ObtainMangaResponse
-import com.angelmascarell.collectorhub.data.model.UserModel
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
+import com.angelmascarell.collectorhub.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val mangaRepository: MangaRepository,
+    private val userRepository: UserRepository,
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
@@ -58,7 +56,7 @@ class HomeViewModel @Inject constructor(
     fun fetchAuthenticatedUser() {
         viewModelScope.launch {
             try {
-                val imageUrl = mangaRepository.getAuthenticatedUser()
+                val imageUrl = userRepository.getAuthenticatedUser()
                 _userImageUrl.postValue(imageUrl)
             } catch (e: Exception) {
                 Log.e("YourViewModel", "Error al obtener la URL de la imagen del usuario", e)

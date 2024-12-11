@@ -13,7 +13,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.angelmascarell.collectorhub.R
 
-// Set of Material typography styles to start with
 val AudioWideFontFamily = FontFamily(
     Font(R.font.audiowide_regular, FontWeight.Normal)
 )
@@ -28,7 +27,6 @@ val TitleTextStyle: TextStyle = TextStyle (
     shadow = Shadow(color = Color.White, offset = Offset(.4f,.4f), blurRadius = .3f)
 )
 
-// Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -37,20 +35,5 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
-    )
-    */
+
 )

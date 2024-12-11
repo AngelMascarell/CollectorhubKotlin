@@ -1,4 +1,4 @@
-package com.angelmascarell.collectorhub.signin.data.model
+package com.angelmascarell.collectorhub.data.model
 
 import com.google.gson.annotations.SerializedName
 

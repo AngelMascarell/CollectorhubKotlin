@@ -6,7 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.angelmascarell.collectorhub.data.local.TokenManager
 import com.angelmascarell.collectorhub.data.model.UserModel
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
-import com.angelmascarell.collectorhub.home.data.network.response.HomeService
+import com.angelmascarell.collectorhub.data.repository.AuthRepository
+import com.angelmascarell.collectorhub.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val mangaApi: MangaRepository,
     private val tokenManager: TokenManager,
-    private val homeService: HomeService
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _userProfile = MutableStateFlow<UserModel?>(null)
@@ -36,7 +38,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = mangaApi.updateAuthenticatedUser(updatedProfile)
+                val response = userRepository.updateAuthenticatedUser(updatedProfile)
 
                 if (response != null) {
                     val updatedUserResponse = response
@@ -75,7 +77,7 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val user = mangaApi.getUserProfile()
+                val user = userRepository.getUserProfile()
                 _userProfile.value = user
             } catch (e: Exception) {
                 _errorMessage.value = "Error al cargar el perfil: ${e.message}"
@@ -87,7 +89,7 @@ class ProfileViewModel @Inject constructor(
 
     fun doLogOut() {
         viewModelScope.launch {
-            homeService.logout()
+            authRepository.logout()
             tokenManager.clearToken()
         }
     }

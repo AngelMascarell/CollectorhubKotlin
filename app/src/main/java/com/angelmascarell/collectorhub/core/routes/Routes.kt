@@ -10,10 +10,16 @@ sealed class Routes(val route: String) {
     object DesiredMangasScreenRoute : Routes("DesiredMangasScreen")
     object NewMangasScreenRoute : Routes("NewMangasScreen")
     object GetMangaScreenRoute : Routes("GetMangaScreen/{mangaId}")
-
-
-
     object SignUpScreenRoute : Routes("signUpScreen")
+
+
+
+
+
+
+
+
+
     object RoomDetailsScreenRoute : Routes("roomDetailsScreen/{number}") {
         fun createRoute(number: String) = "roomDetailsScreen/$number"
     }

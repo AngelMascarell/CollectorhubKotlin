@@ -9,10 +9,16 @@ import androidx.datastore.preferences.core.Preferences
 import com.angelmascarell.collectorhub.core.network.AuthInterceptor
 import com.angelmascarell.collectorhub.data.local.TokenManager
 import com.angelmascarell.collectorhub.data.network.MangaApiService
-import com.angelmascarell.collectorhub.data.network.SignUpService
+import com.angelmascarell.collectorhub.data.network.AuthService
+import com.angelmascarell.collectorhub.data.network.RateService
+import com.angelmascarell.collectorhub.data.network.TaskService
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
 import com.angelmascarell.collectorhub.data.repository.SignUpRepository
-import com.angelmascarell.collectorhub.home.data.network.response.HomeClient
+import com.angelmascarell.collectorhub.data.network.UserService
+import com.angelmascarell.collectorhub.data.repository.AuthRepository
+import com.angelmascarell.collectorhub.data.repository.RateRepository
+import com.angelmascarell.collectorhub.data.repository.TaskRepository
+import com.angelmascarell.collectorhub.data.repository.UserRepository
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer
@@ -84,7 +90,6 @@ object NetworkModule {
     }
 
 
-
     @Singleton
     @Provides
     @Named(WITHOUT_HEADER)
@@ -123,12 +128,6 @@ object NetworkModule {
         return context
     }
 
-    @Singleton
-    @Provides
-    fun provideLoginClient(@Named(WITHOUT_HEADER) retrofit: Retrofit): HomeClient {
-        return retrofit.create(HomeClient::class.java)
-    }
-
     @Provides
     fun provideMangaRepository(
         apiService: MangaApiService,
@@ -144,27 +143,77 @@ object NetworkModule {
         return retrofit.create(MangaApiService::class.java)
     }
 
+    @Provides
+    fun provideAuthRepository(
+        apiService: AuthService,
+        dataStore: DataStore<Preferences>,
+        tokenManager: TokenManager
+    ): AuthRepository {
+        return AuthRepository(apiService, dataStore, tokenManager)
+    }
+
     @Singleton
     @Provides
-    fun provideSignUpService(@Named(WITHOUT_HEADER) retrofit: Retrofit): SignUpService {
-        return retrofit.create(SignUpService::class.java)
+    fun provideAuthService(@Named(WITHOUT_HEADER) retrofit: Retrofit): AuthService {
+        return retrofit.create(AuthService::class.java)
     }
 
     @Provides
     fun provideSignUpRepository(
-        apiService: SignUpService,
+        apiService: AuthService,
         dataStore: DataStore<Preferences>
     ): SignUpRepository {
         return SignUpRepository(apiService, dataStore)
     }
 
 
-
-
-/*    @Provides
-    fun provideHomeViewModel(repository: MangaRepository): HomeViewModel {
-        return HomeViewModel(repository)
+    @Provides
+    fun provideRateRepository(
+        apiService: RateService,
+        dataStore: DataStore<Preferences>
+    ): RateRepository {
+        return RateRepository(apiService, dataStore)
     }
 
- */
+    @Singleton
+    @Provides
+    fun provideRateService(@Named(WITH_HEADER) retrofit: Retrofit): RateService {
+        return retrofit.create(RateService::class.java)
+    }
+
+    @Provides
+    fun provideTaskRepository(
+        apiService: TaskService,
+        dataStore: DataStore<Preferences>
+    ): TaskRepository {
+        return TaskRepository(apiService, dataStore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideTaskService(@Named(WITH_HEADER) retrofit: Retrofit): TaskService {
+        return retrofit.create(TaskService::class.java)
+    }
+
+    @Provides
+    fun provideUserRepository(
+        apiService: UserService,
+        dataStore: DataStore<Preferences>
+    ): UserRepository {
+        return UserRepository(apiService, dataStore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideUserService(@Named(WITH_HEADER) retrofit: Retrofit): UserService {
+        return retrofit.create(UserService::class.java)
+    }
+
+
+    /*    @Provides
+        fun provideHomeViewModel(repository: MangaRepository): HomeViewModel {
+            return HomeViewModel(repository)
+        }
+
+     */
 }

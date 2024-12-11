@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +41,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,11 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
 import com.angelmascarell.collectorhub.data.model.MangaModel
-import com.angelmascarell.collectorhub.home.presentation.PremiumAdBanner
 import com.angelmascarell.collectorhub.viewmodel.CollectionViewModel
 
 @Composable
@@ -84,7 +80,11 @@ fun CollectionScreen() {
 
         Text(
             text = "Resumen de tu colección",
-            style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            style = TextStyle(
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -104,7 +104,7 @@ fun CollectionScreen() {
             )
         }
 
-        PremiumAdBanner (onClick = {
+        PremiumAdBanner(onClick = {
             navController.navigate(Routes.PremiumScreenRoute.route)
         })
 
@@ -118,7 +118,11 @@ fun CollectionScreen() {
 
         Text(
             text = "Tu colección",
-            style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
         )
         Spacer(modifier = Modifier.height(16.dp))
         MangaGrid(
@@ -160,7 +164,6 @@ fun InfoCard(title: String, value: String) {
         }
     }
 }
-
 
 
 @Composable

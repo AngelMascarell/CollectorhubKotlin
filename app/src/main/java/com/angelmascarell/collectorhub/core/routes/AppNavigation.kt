@@ -17,8 +17,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.angelmascarell.collectorhub.home.presentation.HomeScreen
-import com.angelmascarell.collectorhub.signin.presentation.SignInScreen
+import com.angelmascarell.collectorhub.ui.view.HomeScreen
+import com.angelmascarell.collectorhub.ui.view.SignInScreen
 import com.angelmascarell.collectorhub.ui.view.CollectionScreen
 import com.angelmascarell.collectorhub.ui.view.DesiredMangasScreen
 import com.angelmascarell.collectorhub.ui.view.ErrorScreen

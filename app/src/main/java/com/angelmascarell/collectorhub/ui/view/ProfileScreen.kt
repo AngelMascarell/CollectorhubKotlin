@@ -271,7 +271,8 @@ fun PersonalInfoSection(
             label = "Correo electrónico",
             readOnly = !isEditing,
             onTextChanged = { newText -> onTextChanged("email", newText) },
-            imageVector = Icons.Default.Email
+            imageVector = Icons.Default.Email,
+            color = MaterialTheme.colorScheme.onBackground
         )
         MyBasicTextFieldReadOnly(
             value = (editableUser.birthdate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
@@ -300,7 +301,7 @@ fun AccountStatusSection(isPremium: Boolean) {
     Text(
         text = if (isPremium) "Cuenta Premium Activa" else "Cuenta Estándar",
         style = MaterialTheme.typography.bodyLarge,
-        color = Color.Black,
+        color = MaterialTheme.colorScheme.onBackground,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
     )

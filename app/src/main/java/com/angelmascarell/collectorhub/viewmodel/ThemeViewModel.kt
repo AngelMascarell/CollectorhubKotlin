@@ -15,11 +15,9 @@ class ThemeViewModel @Inject constructor(
     private val themeManager: ThemeManager
 ) : ViewModel() {
 
-    // Exponer el tema como un StateFlow
     val isDarkTheme: StateFlow<Boolean> = themeManager.isDarkTheme
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
-    // Cambiar el tema y guardar la preferencia en DataStore
     fun toggleTheme() {
         viewModelScope.launch {
             val newTheme = !isDarkTheme.value

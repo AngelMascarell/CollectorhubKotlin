@@ -26,7 +26,4 @@ class NewMangasViewModel @Inject constructor(private val mangaApi: MangaReposito
             _newMangas.postValue(emptyList())
         }
     }
-
-
-
 }

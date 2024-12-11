@@ -13,6 +13,9 @@ import com.angelmascarell.collectorhub.data.model.RateCreateModel
 import com.angelmascarell.collectorhub.data.model.RateModel
 import com.angelmascarell.collectorhub.data.model.RateResponseList
 import com.angelmascarell.collectorhub.data.repository.MangaRepository
+import com.angelmascarell.collectorhub.data.repository.RateRepository
+import com.angelmascarell.collectorhub.data.repository.TaskRepository
+import com.angelmascarell.collectorhub.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +26,12 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepository) : ViewModel() {
+class GetMangaViewModel @Inject constructor(
+    private val mangaApi: MangaRepository,
+    private val userRepository: UserRepository,
+    private val taskRepository: TaskRepository,
+    private val rateRepository: RateRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow<MangaDetailState>(MangaDetailState.Loading)
     val state: StateFlow<MangaDetailState> get() = _state
@@ -40,7 +48,7 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
     suspend fun checkTasks(): Response<String> {
         isLoading = true
         return try {
-            val response = mangaApi.checkTaskCompletion()
+            val response = taskRepository.checkTaskCompletion()
             isLoading = false
             response
         } catch (e: Exception) {
@@ -69,7 +77,7 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
     fun fetchAverageRate(mangaId: Long) {
         viewModelScope.launch {
             try {
-                val rate = mangaApi.getAverageRateByMangaId(mangaId)
+                val rate = rateRepository.getAverageRateByMangaId(mangaId)
                 _averageRate.value = rate
             } catch (e: Exception) {
                 _averageRate.value = 0
@@ -83,7 +91,7 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
     fun fetchRatesByMangaId(mangaId: Long) {
         viewModelScope.launch {
             try {
-                val response: RateResponseList = mangaApi.getRatesByMangaId(mangaId)
+                val response: RateResponseList = rateRepository.getRatesByMangaId(mangaId)
                 _rates.value = response.rateResponseList.map { rateResponse ->
                     RateModel(
                         id = rateResponse.id,
@@ -103,7 +111,7 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
 
     suspend fun addMangaToUser(mangaId: Long): Response<String> {
         return try {
-            val response = mangaApi.addMangaToUser(mangaId)
+            val response = userRepository.addMangaToUser(mangaId)
             response
         } catch (e: Exception) {
             Response.success("FALLO ")
@@ -111,7 +119,7 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
     }
 
     suspend fun isMangaInCollection(mangaId: Long): Boolean {
-        return mangaApi.checkIfMangaInCollection(mangaId)
+        return userRepository.checkIfMangaInCollection(mangaId)
     }
 
     private val _reviewState = MutableLiveData<ReviewState>()
@@ -121,7 +129,7 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
         viewModelScope.launch {
             _reviewState.value = ReviewState.Loading
             try {
-                val response = mangaApi.addReview(review)
+                val response = rateRepository.addReview(review)
                 if (response.isSuccessful) {
                     _reviewState.value = ReviewState.Success("Reseña enviada con éxito")
                     _hasReviewed.value = true
@@ -141,7 +149,7 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
     fun checkUserReview(mangaId: Long) {
         viewModelScope.launch {
             try {
-                val isReviewed = mangaApi.hasUserReviewed(mangaId)
+                val isReviewed = rateRepository.hasUserReviewed(mangaId)
                 _hasReviewed.value = isReviewed
             } catch (e: Exception) {
                 _hasReviewed.value = null
@@ -160,12 +168,12 @@ class GetMangaViewModel @Inject constructor(private val mangaApi: MangaRepositor
     }
 
     suspend fun isMangaInDesiredCollection(mangaId: Long): Boolean {
-        return mangaApi.checkIfMangaInDesiredCollection(mangaId)
+        return userRepository.checkIfMangaInDesiredCollection(mangaId)
     }
 
     suspend fun addDesiredMangaToUser(mangaId: Long): Response<String> {
         return try {
-            val response = mangaApi.addDesiredMangaToUser(mangaId)
+            val response = userRepository.addDesiredMangaToUser(mangaId)
             response
         } catch (e: Exception) {
             Response.success("ERROR")

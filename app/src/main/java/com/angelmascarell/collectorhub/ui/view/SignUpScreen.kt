@@ -40,10 +40,6 @@ import com.angelmascarell.collectorhub.R
 import com.angelmascarell.collectorhub.core.composable.MyButton
 import com.angelmascarell.collectorhub.core.routes.LocalNavController
 import com.angelmascarell.collectorhub.core.routes.Routes
-import com.angelmascarell.collectorhub.signin.presentation.EmailTextField
-import com.angelmascarell.collectorhub.signin.presentation.PasswordTextField
-import com.angelmascarell.collectorhub.signin.presentation.UsernameTextField
-import com.angelmascarell.collectorhub.ui.theme.MySoftBlue
 import com.angelmascarell.collectorhub.ui.theme.MyUltraBlue
 import com.angelmascarell.collectorhub.viewmodel.SignUpViewModel
 import java.time.LocalDate

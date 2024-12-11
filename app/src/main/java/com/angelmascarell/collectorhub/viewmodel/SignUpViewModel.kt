@@ -8,12 +8,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.angelmascarell.collectorhub.data.model.RegisterModel
-import com.angelmascarell.collectorhub.data.network.SignUpService
 import com.angelmascarell.collectorhub.data.repository.SignUpRepository
-import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import okhttp3.FormBody
 import java.time.LocalDate
 import javax.inject.Inject
 

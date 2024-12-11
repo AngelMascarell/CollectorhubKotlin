@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-// Usa el delegado DataStore desde el contexto de la aplicación
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "token_data_store")
 
 class TokenManager @Inject constructor(
