@@ -272,7 +272,6 @@ fun PersonalInfoSection(
             readOnly = !isEditing,
             onTextChanged = { newText -> onTextChanged("email", newText) },
             imageVector = Icons.Default.Email,
-            color = MaterialTheme.colorScheme.onBackground
         )
         MyBasicTextFieldReadOnly(
             value = (editableUser.birthdate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
