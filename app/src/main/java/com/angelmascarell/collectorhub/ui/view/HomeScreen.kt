@@ -271,7 +271,7 @@ fun FirstRowButtons(navController: NavHostController) {
                 Routes.CollectionScreenRoute.route
             )
         }
-        HomeButton("Futuros", R.drawable.anadir, Modifier.weight(1f)) {
+        HomeButton("Deseados", R.drawable.anadir, Modifier.weight(1f)) {
             navController.navigate(
                 Routes.DesiredMangasScreenRoute.route
             )
