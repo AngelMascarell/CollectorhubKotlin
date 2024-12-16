@@ -80,9 +80,9 @@ fun Header() {
     ) {
         Text(
             text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold,             color = MaterialTheme.colorScheme.onBackground
-                )) {
-                    append("Create ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold,color = MaterialTheme.colorScheme.onBackground))
+                {
+                    append("Crear ")
                 }
                 withStyle(
                     style = SpanStyle(
@@ -90,13 +90,13 @@ fun Header() {
                         color = MyUltraBlue
                     )
                 ) {
-                    append("Account")
+                    append("Cuenta")
                 }
             },
             fontSize = 30.sp
         )
         Text(
-            text = "Sign up to get started",
+            text = "Regístrate para empezar",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .fillMaxWidth()
@@ -149,10 +149,10 @@ fun Body(navController: NavController) {
         Spacer(modifier = Modifier.padding(vertical = 10.dp))
 
         val context = LocalContext.current
-        MyButton(text = "Sign Up") {
+        MyButton(text = "Registrarte") {
             signUpViewModel.signUp { isSuccess, errorMessage ->
                 if (isSuccess) {
-                    Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Registro completado!", Toast.LENGTH_SHORT).show()
                     navController.navigate(Routes.SignInScreenRoute.route)
                 } else {
                     errorMessage?.let {
@@ -164,7 +164,7 @@ fun Body(navController: NavController) {
         }
 
         Text(
-            text = "--- Or sign up with ---",
+            text = "--- O accede con ---",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
@@ -207,7 +207,7 @@ fun BirthdatePicker(
     )
 
     OutlinedButton(onClick = { datePickerDialog.show() }) {
-        Text(text = birthdate?.toString() ?: "Select Birthdate")
+        Text(text = birthdate?.toString() ?: "Fecha de nacimiento")
     }
 }
 
@@ -229,7 +229,7 @@ fun Footer(navController: NavController) {
                         fontSize = 15.sp
                     )
                 ) {
-                    append("Already have an account? ")
+                    append("Ya tienes una cuenta? ")
                 }
                 withStyle(
                     style = SpanStyle(

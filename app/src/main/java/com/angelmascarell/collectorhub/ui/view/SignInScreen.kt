@@ -84,7 +84,7 @@ fun HeaderSignIn() {
                         fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground
                     )
                 ) {
-                    append("Welcome ")
+                    append("Bienvenido ")
                 }
                 withStyle(
                     style = SpanStyle(
@@ -92,13 +92,13 @@ fun HeaderSignIn() {
                         color = MyUltraBlue
                     )
                 ) {
-                    append("Back")
+                    append("De nuevo")
                 }
             },
             fontSize = 30.sp
         )
         Text(
-            text = "Login to proceed with us",
+            text = "Inicia sesión para continuar",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .fillMaxWidth()
@@ -121,7 +121,7 @@ fun BodySignIn(navController: NavController, signInViewModel: SignInViewModel = 
         val username by signInViewModel.username.observeAsState("")
         val password by signInViewModel.password.observeAsState("")
 
-        EmailTextField(value = username) {
+        UsernameTextField(value = username) {
             signInViewModel.onSignInChanged(username = it, password = password)
         }
         PasswordTextField(value = password) {
@@ -138,7 +138,7 @@ fun BodySignIn(navController: NavController, signInViewModel: SignInViewModel = 
                         color = MyUltraBlue
                     )
                 ) {
-                    append("Forgot password?")
+                    append("Olvidaste la contraseña?")
                 }
             },
             modifier = Modifier
@@ -156,14 +156,14 @@ fun BodySignIn(navController: NavController, signInViewModel: SignInViewModel = 
                 if (loginResult) {
                     navController.navigate(Routes.HomeScreenRoute.route)
                 } else {
-                    Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Usuario o contraseña no válido", Toast.LENGTH_SHORT).show()
                 }
             }
 
         }
 
         Text(
-            text = "--- Or continue with ---",
+            text = "--- O accede con ---",
             color = Color.Gray,
             modifier = Modifier
                 .fillMaxWidth()
@@ -201,7 +201,7 @@ fun FooterSignIn(navController: NavController) {
                         fontSize = 15.sp
                     )
                 ) {
-                    append("Does not have an account? ")
+                    append("No tienes una cuenta? ")
                 }
                 withStyle(
                     style = SpanStyle(
@@ -209,7 +209,7 @@ fun FooterSignIn(navController: NavController) {
                         color = MyUltraBlue, fontWeight = FontWeight.Bold, fontSize = 15.sp
                     )
                 ) {
-                    append("Sign Up")
+                    append("Regístrate")
                 }
             },
             modifier = Modifier.clickable { navController.navigate(Routes.SignUpScreenRoute.route) }
@@ -239,7 +239,7 @@ fun EmailTextField(value: String, onTextChanged: (String) -> Unit) {
 fun UsernameTextField(value: String, onTextChanged: (String) -> Unit) {
     MyBasicTextField(
         value = value,
-        label = "Email",
+        label = "Usuario",
         onTextChanged = onTextChanged,
         imageVector = Icons.Default.AccountCircle
     )
@@ -249,7 +249,7 @@ fun UsernameTextField(value: String, onTextChanged: (String) -> Unit) {
 fun PasswordTextField(value: String, onTextChanged: (String) -> Unit) {
     MyBasicTextField(
         value = value,
-        label = "Password",
+        label = "Contraseña",
         onTextChanged = onTextChanged,
         imageVector = Icons.Default.Lock,
         password = true

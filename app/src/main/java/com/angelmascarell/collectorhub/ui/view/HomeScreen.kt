@@ -410,11 +410,7 @@ fun MangaSlider(
 
 @Composable
 fun MangaImage(manga: MangaModel, onClick: () -> Unit) {
-    val imageUrl = if (manga.imageUrl.startsWith("https")) {
-        manga.imageUrl
-    } else {
-        "http://10.0.2.2:8080${manga.imageUrl}"
-    }
+    val imageUrl = "http://10.0.2.2:8080${manga.imageUrl}"
 
     Log.d("Image URL", "URL: $imageUrl")
 
@@ -430,7 +426,7 @@ fun MangaImage(manga: MangaModel, onClick: () -> Unit) {
             painter = rememberAsyncImagePainter(imageUrl),
             contentDescription = manga.title,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Fit
         )
     }
 }
